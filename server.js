@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const Enmap = require("enmap");
-const fs = require("fs-extra")
+const fs = require("fs-extra");
+const token = process.env.TOKEN;
 const client = new Discord.Client();
 const hypixel = require("hypixel-api")
 const parser = require("discord-command-parser")
@@ -23,4 +24,4 @@ client.on('message', message => {
     if(message.author.bot==true) return
 
 }); 
-client.login('token');
+client.login(token);
