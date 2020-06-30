@@ -4,7 +4,11 @@
   "description": "Hypixel Stats Discord Bot",
   "main": "server.js",
   "dependencies": {
-    "discord.js": "^12.2.0"
+    "axios": "^0.19.2",
+    "better-sqlite3": "^7.1.0",
+    "discord-command-parser": "^1.4.3",
+    "discord.js": "^12.2.0",
+    "hypixel-api": "^1.2.0"
   },
   "devDependencies": {},
   "scripts": {
