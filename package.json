@@ -1,0 +1,24 @@
+{
+  "name": "hystatsbotrepo",
+  "version": "1.0.0",
+  "description": "Hypixel Stats Discord Bot",
+  "main": "server.js",
+  "dependencies": {
+    "discord.js": "^12.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "console.log(\"hi\")",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Not-Ethan/HyStatsBotRepo.git"
+  },
+  "author": "Not-Ethan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Not-Ethan/HyStatsBotRepo/issues"
+  },
+  "homepage": "https://github.com/Not-Ethan/HyStatsBotRepo#readme"
+}
