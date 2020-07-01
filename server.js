@@ -27,7 +27,7 @@ client.on('message', message => {
         const username = args[0]
         const gamemode = args[1]
     }
-    if(message.author.id==""&&message.content=="testtrigger") {
+    if(message.author.id=="402639792552017920"&&message.content=="testtrigger") {
         message.reply("test confirm");
     }
 }); 
