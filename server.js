@@ -8,6 +8,7 @@ const parser = require("discord-command-parser")
 const axios = require("axios")
 const hyClient = new hypixel("a790f417-f352-461b-9b53-72931a796675")
 const prefix = "s-"
+console.log(token)
 client.on('ready', () => {
     console.log("Ready!")
     client.user.setPresence({
