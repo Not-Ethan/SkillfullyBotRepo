@@ -5,6 +5,7 @@ const client = new Discord.Client();
 const hypixel = require("hypixel-api")
 const parser = require("discord-command-parser")
 const axios = require("axios")
+const token = process.env.TOKEN;
 const hyClient = new hypixel("a790f417-f352-461b-9b53-72931a796675")
 const prefix = "s-"
 client.on('ready', () => {
@@ -33,4 +34,4 @@ client.on('message', (message) => {
     }
     
 });
-client.login("");
+client.login(token);
