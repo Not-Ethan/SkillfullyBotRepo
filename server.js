@@ -1,7 +1,6 @@
 const Discord = require("discord.js");
 const Enmap = require("enmap");
 const fs = require("fs-extra");
-const token = process.env.TOKEN;
 const client = new Discord.Client();
 const hypixel = require("hypixel-api")
 const parser = require("discord-command-parser")
@@ -22,7 +21,6 @@ client.on('ready', () => {
 
 client.on('message', (message) => {
     console.log(message)
-    if(!message.content.startsWith(prefix)) return
     if(message.author.bot==true) return
     if(message.content==`${prefix}j`) {
         const args = message.content.split(" ").slice(1)
@@ -35,4 +33,4 @@ client.on('message', (message) => {
     }
     
 });
-client.login(token);
+client.login("");

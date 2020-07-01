@@ -9,6 +9,7 @@
     "discord-command-parser": "^1.4.3",
     "discord.js": "^12.2.0",
     "enmap": "^5.3.1",
+    "fs-extra": "^9.0.1",
     "hypixel-api": "^1.2.0"
   },
   "devDependencies": {},
