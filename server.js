@@ -26,9 +26,11 @@ client.on('message', message => {
         const args = message.content.split(" ").slice(1)
         const username = args[0]
         const gamemode = args[1]
+        message.channel.send("j")
     }
     if(message.author.id=="402639792552017920"&&message.content=="testtrigger") {
         message.reply("test confirm");
     }
+    console.log(message)
 }); 
 client.login(token);
