@@ -25,6 +25,7 @@ client.on('message', (message) => {
     if(message.content==`${prefix}j`) {
         const args = message.content.split(" ").slice(1)
         const username = args[0]
+        console.log(username)
         const gamemode = args[1]
         message.channel.send("j")
         hyClient.getPlayer("name", username).then(player=>{
