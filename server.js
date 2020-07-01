@@ -21,17 +21,22 @@ client.on('ready', () => {
 });
 
 client.on('message', (message) => {
-    console.log(message)
     if(message.author.bot==true) return
     if(message.content==`${prefix}j`) {
         const args = message.content.split(" ").slice(1)
         const username = args[0]
         const gamemode = args[1]
         message.channel.send("j")
+        hyClient.getPlayer("name", username).then(player=>{
+            console.log(player)
+        }).catch(
+            error=>{
+                console.log(error)
+            }
+        )
     }
     if(message.author.id=="402639792552017920"&&message.content=="test") {
         message.reply("test");
     }
-    
 });
 client.login(token);
