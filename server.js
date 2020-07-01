@@ -9,7 +9,8 @@ const axios = require("axios")
 const hyClient = new hypixel("a790f417-f352-461b-9b53-72931a796675")
 const prefix = "s-"
 client.on('ready', () => {
-    console.log("Ready!")
+    console.log(`Ready! ${client.user.tag}`);
+    client.channels.cache.get("722173404995780708").send("jdjdasj")
     client.user.setPresence({
         activity: {
             name: "Skillfully Guild"
