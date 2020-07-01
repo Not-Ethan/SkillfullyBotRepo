@@ -22,7 +22,7 @@ client.on('ready', () => {
 
 client.on('message', (message) => {
     if(message.author.bot==true) return
-    if(message.content==`${prefix}j`) {
+    if(message.content.startsWith(`${prefix}j`)) {
         const args = message.content.split(" ").slice(1)
         const username = args[0]
         console.log(username)
