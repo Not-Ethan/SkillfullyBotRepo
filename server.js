@@ -16,22 +16,23 @@ client.on('ready', () => {
             name: "Skillfully Guild"
         },
         status: "idle",
-        type: "LISTENING"
+        type: "WATCHING"
     })
 });
 
-client.on('message', message => {
+client.on('message', (message) => {
+    console.log(message)
     if(!message.content.startsWith(prefix)) return
     if(message.author.bot==true) return
-    if(message.content==`${prefix}stats`) {
+    if(message.content==`${prefix}j`) {
         const args = message.content.split(" ").slice(1)
         const username = args[0]
         const gamemode = args[1]
         message.channel.send("j")
     }
-    if(message.author.id=="402639792552017920"&&message.content=="testtrigger") {
-        message.reply("test confirm");
+    if(message.author.id=="402639792552017920"&&message.content=="test") {
+        message.reply("test");
     }
-    console.log(message)
-}); 
+    
+});
 client.login(token);
