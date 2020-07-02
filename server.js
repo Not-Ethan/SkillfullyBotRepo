@@ -6,11 +6,15 @@ const hypixel = require("hypixel-api")
 const parser = require("discord-command-parser")
 const axios = require("axios")
 const token = process.env.TOKEN;
-const hyClient = new hypixel("a790f417-f352-461b-9b53-72931a796675")
+const hyClient = new hypixel(process.env.key)
 const prefix = "s-"
 function capitalize(s) {
     if(typeof s != "string") return
     return s.charAt(0).toUpperCase + s.slice(1);
+}
+function formatNumber(x) {
+    return x.toLocaleString()
+    //return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 client.on('ready', () => {
     console.log(`Ready! ${client.user.tag}`);
@@ -50,7 +54,6 @@ client.on('message', (message) => {
             if(gamemode == "Bedwars") {
                 base = player.player.stats["Bedwars"]
                 embed
-                
                 .addField("Level/Stars:", player.player.achievements.bedwars_level)
                 .addField("Final Kills",  base["final_kills_bedwars"], true)
                 .addField("Final Deaths",  base["final_deaths_bedwars"], true)
@@ -76,10 +79,104 @@ client.on('message', (message) => {
                     }
                 }
             }
-            console.log(player.player.stats.SkyWars)
+            function getPresFromLevel(level) {
+                if(level<5) {
+                    return "None"
+                }
+                if(level<10) {
+                    return "Iron"
+                }
+                if(level<15) {
+                    return "Gold"
+                }
+                if(level<20) {
+                    return "Diamond"
+                }
+                if(level<25) {
+                    return "Emerald"
+                }
+                if(level<30) {
+                    return "Sapphire"
+                }
+                if(level<35) {
+                    return "Ruby"
+                }
+                if(level<40) {
+                    return "Crystal"
+                }
+                if(level<45) {
+                    return "Opal"
+                }
+                if(level<50) {
+                    return "Amethyst"
+                }
+                if(level>=50) {
+                    return "Rainbow"
+                }
+            }
+            base = player.player.stats.SkyWars
+            embed
+            .addField("Level", Math.round(100*sw_xp_to_lvl(base.skywars_experience))/100)
+            .addField("Prestige", getPresFromLevel(sw_xp_to_lvl(base.skywars_experience)))
+            .addFields(
+                {name: "Total games won", value: base.wins, inline: true},
+                {name: "Total games lost", value: base.losses, inline: true},
+                {name: "WLR", value: Math.round(1000*(base.wins/base.losses))/1000, inline: true}
+            )
+            .addField("\u200b", "\u200b")
+            .addFields(
+                {name: "Total kills", value: base.kills, inline: true},
+                {name: "Deaths", value: base.deaths, inline: true},
+                {name: "KDR", value: Math.round(1000*(base.kills/base.deaths))/1000, inline: true}
+            )
             return embed
         } else if(gamemode=="Skyblock") {
+            axios.get(`https://api.mojang.com/users/profiles/minecraft/${username}`).then(data=>{
+            if(!data.status==200) {
+                let error = new Error(`Error mojang api returned a response code of ${data.status}.`)
+                throw error
+            }
+            let profs = []
+            for(let i in player.player.stats.SkyBlock.profiles) {
+                var uuid = data.data.id;
+                
+                let id = player.player.stats.SkyBlock.profiles[i].profile_id
+                let name = player.player.stats.SkyBlock.profiles[i].cute_name
+                axios.get(`https://api.hypixel.net/skyblock/profile?key=${process.env.key}&profile=${id}`).then(res=>{
+                    if(!res.status==200) {
+                        let error = new Error(`Error hypixel api returned a response code of ${res.status}.`)
+                        throw error
+                    }
+                     profs.push({
+                    last_save: res.data.profile.members[uuid].last_save,
+                    profile: id,
+                    data: res.data,
+                    name: name,
+                    username: username
+                })
+                }
+                )
+            }
+            function compareSaves(x) {
+            let n = 0
+            for(var i=0; i<x.length; i++) {
+                var removed = arr.splice(i, 1)
+            for(var j=0; j<removed.length; j++) {
+                if(x[i].diff<j.diff) {
+                    n = n
+                } else {
+                    n += 1
+                }
+            }
+            }
+            return x[i]
+        }
+        compareSaves(profs)
+        })
+            
 
+
+            return "Currently under construction! :tools:"
         }
 
         }).then( j=>
@@ -87,7 +184,6 @@ client.on('message', (message) => {
         )
         .catch(
             error=>{
-
                 if(error) console.log(error)
                     message.channel.send("An error occured, are you sure that player exists?")
             }
