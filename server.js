@@ -34,7 +34,7 @@ client.on('message', (message) => {
     }
     const gamemodes2 = ["Bedwars", "Skywars", "Skyblock"]
     if(message.author.bot==true) return
-    if(message.content.startsWith(`${prefix}j`)) {
+    if(message.content.startsWith(`${prefix}stats`)) {
         const args = message.content.split(" ").slice(1)
         const username = args[0]
         let gamemode = args[1]
