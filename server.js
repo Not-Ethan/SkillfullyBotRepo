@@ -62,7 +62,6 @@ client.on('message', (message) => {
                 .addField("\u200b", "\u200b")
                 .addField("Beds Broken", base.beds_broken_bedwars, true)
                 .addField("BBLR", Math.round(1000*(base.beds_broken_bedwars/base.losses_bedwars))/1000, true)
-                .addField("\u200b", "\u200b")
                 .addFields({name: "WLR", value: Math.round(1000*(base.wins_bedwars/base.losses_bedwars))/1000, inline: true})
                 .setAuthor(message.guild.me.displayName, message.guild.me.user.avatarURL(), null)
                 return embed
