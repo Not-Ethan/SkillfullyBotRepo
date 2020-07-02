@@ -60,7 +60,7 @@ client.on('message', (message) => {
                 .addField("Final Deaths",  base["final_deaths_bedwars"], true)
                 .addField("FKDR", Math.round(1000*(base.final_kills_bedwars/base.final_deaths_bedwars))/1000, true)
                 .addField("\u200b", "\u200b")
-                .addField("Total Beds Broken", base.beds_broken_bedwars, true)
+                .addField("Beds Broken", base.beds_broken_bedwars, true)
                 .addField("BBLR", Math.round(1000*(base.beds_broken_bedwars/base.losses_bedwars))/1000, true)
                 .addField("\u200b", "\u200b")
                 .addFields({name: "WLR", value: Math.round(1000*(base.wins_bedwars/base.losses_bedwars))/1000, inline: true})
