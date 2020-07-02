@@ -51,6 +51,7 @@ client.on('message', (message) => {
             .setFooter("© 2020 skillfully guild", "https://i.ibb.co/GMmBzLY/blue-and-purp.png")
             .setThumbnail("https://i.ibb.co/GMmBzLY/blue-and-purp.png")
             .setTitle(`Stats for ${username} in \`${gamemode}\``)
+            .setTimestamp()
             if(gamemode == "Bedwars") {
                 base = player.player.stats["Bedwars"]
                 embed
@@ -63,7 +64,6 @@ client.on('message', (message) => {
                 .addField("BBLR", Math.round(1000*(base.beds_broken_bedwars/base.losses_bedwars))/1000, true)
                 .addField("\u200b", "\u200b")
                 .addFields({name: "WLR", value: Math.round(1000*(base.wins_bedwars/base.losses_bedwars))/1000, inline: true})
-                .setTimestamp()
                 .setAuthor(message.guild.me.displayName, message.guild.me.user.avatarURL(), null)
                 return embed
         } else if(gamemode == "Skywars") {
