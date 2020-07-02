@@ -188,7 +188,7 @@ client.on('message', (message) => {
             }
         )
     }
-    if(message.author.id=="402639792552017920"&&message.content=="test") {
+    if(message.author.id=="402639792552017920"&&message.content=="s-test") {
         message.reply("test");
     }
 });
