@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
 const Enmap = require("enmap");
+const events = require("events")
 const fs = require("fs-extra");
 const client = new Discord.Client();
 const hypixel = require("hypixel-api")
@@ -16,6 +17,7 @@ function formatNumber(x) {
     return x.toLocaleString()
     //return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+const emitter = new events.EventEmitter()
 client.on('ready', () => {
     console.log(`Ready! ${client.user.tag}`);
     client.user.setPresence({
@@ -135,7 +137,7 @@ client.on('message', (message) => {
                 let error = new Error(`Error mojang api returned a response code of ${data.status}.`)
                 throw error
             }
-            let profs = []
+            
             for(let i in player.player.stats.SkyBlock.profiles) {
                 var uuid = data.data.id;
                 
@@ -146,35 +148,39 @@ client.on('message', (message) => {
                         let error = new Error(`Error hypixel api returned a response code of ${res.status}.`)
                         throw error
                     }
+                    let profs = []
                      profs.push({
                     last_save: res.data.profile.members[uuid].last_save,
                     profile: id,
-                    data: res.data,
+                    data: res.data.profile,
                     name: name,
                     username: username
                 })
+                
+                }
+                ).then(profs=>{
+                    function compareSaves(x) {
+                        let n = 0
+                        for(var i=0; i<x.length; i++) {
+                            var removed = arr.splice(i, 1)
+                        for(var j=0; j<removed.length; j++) {
+                            if(x[i].diff<j.diff) {
+                                n = n
+                            } else {
+                                n += 1
+                            }
+                        }
+                        }
+                        return x[i]
+                    }
+                    if(profs.length>1) {
+                        console.log(compareSaves(profs))
+                    }
                 }
                 )
             }
-            function compareSaves(x) {
-            let n = 0
-            for(var i=0; i<x.length; i++) {
-                var removed = arr.splice(i, 1)
-            for(var j=0; j<removed.length; j++) {
-                if(x[i].diff<j.diff) {
-                    n = n
-                } else {
-                    n += 1
-                }
-            }
-            }
-            return x[i]
-        }
-        compareSaves(profs)
+
         })
-            
-
-
             return "Currently under construction! :tools:"
         }
 

@@ -9,12 +9,13 @@
     "discord-command-parser": "^1.4.3",
     "discord.js": "^12.2.0",
     "enmap": "^5.3.1",
+    "events": "^3.1.0",
     "fs-extra": "^9.0.1",
     "hypixel-api": "^1.2.0"
   },
   "devDependencies": {},
   "scripts": {
-    "test": "console.log(\"hi\")",
+    "test": "./j.sh",
     "start": "node server.js"
   },
   "repository": {
