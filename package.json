@@ -15,7 +15,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "./j.sh",
+    "test": ". ./j.sh",
     "start": "node server.js"
   },
   "repository": {

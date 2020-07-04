@@ -132,6 +132,7 @@ client.on('message', (message) => {
             )
             return embed
         } else if(gamemode=="Skyblock") {
+            let profs = []
             axios.get(`https://api.mojang.com/users/profiles/minecraft/${username}`).then(data=>{
             if(!data.status==200) {
                 let error = new Error(`Error mojang api returned a response code of ${data.status}.`)
@@ -148,39 +149,47 @@ client.on('message', (message) => {
                         let error = new Error(`Error hypixel api returned a response code of ${res.status}.`)
                         throw error
                     }
-                    let profs = []
-                     profs.push({
+                    
+                     let save = {
                     last_save: res.data.profile.members[uuid].last_save,
                     profile: id,
                     data: res.data.profile,
                     name: name,
                     username: username
-                })
-                
                 }
-                ).then(profs=>{
-                    function compareSaves(x) {
-                        let n = 0
-                        for(var i=0; i<x.length; i++) {
-                            var removed = arr.splice(i, 1)
-                        for(var j=0; j<removed.length; j++) {
-                            if(x[i].diff<j.diff) {
-                                n = n
-                            } else {
-                                n += 1
-                            }
-                        }
-                        }
-                        return x[i]
-                    }
-                    if(profs.length>1) {
-                        console.log(compareSaves(profs))
-                    }
+                profs.push(save)
                 }
                 )
             }
+            emitter.emit("profiles", profs)
 
         })
+                emitter.on("profiles", profiles=>{ 
+                function compareSaves(x) {
+                    let n = 0
+                    for(var i=0; i<x.length; i++) {
+                        var removed = arr.splice(i, 1)
+                    for(var j=0; j<removed.length; j++) {
+                        if(x[i].diff<j.diff) {
+                            n = n
+                        } else {
+                            n += 1
+                        }
+                    }
+                    }
+
+                    if(n=0){return x[i]}
+                }
+                if(profs.length>1) {
+                    console.log("Compared: "+profs.length+" profiles. "+compareSaves(profs))
+                } else if(profs.length==1) {
+                    console.log(profs[0])
+                } else {
+                    return console.log("Error player has no profiles!")
+                }
+                
+                })
+                
             return "Currently under construction! :tools:"
         }
 
