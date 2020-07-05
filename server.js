@@ -168,7 +168,7 @@ client.on('message', (message) => {
                 function compareSaves(x) {
                     let n = 0
                     for(var i=0; i<x.length; i++) {
-                        var removed = arr.splice(i, 1)
+                        var removed = x.splice(i, 1)
                     for(var j=0; j<removed.length; j++) {
                         if(x[i].diff<j.diff) {
                             n = n
@@ -185,14 +185,13 @@ client.on('message', (message) => {
                 } else if(profs.length==1) {
                     console.log(profs[0])
                 } else {
-                    return console.log("Error player has no profiles!")
+                    return "Error player has no profiles!"
                 }
-                
+
                 })
                 
             return "Currently under construction! :tools:"
         }
-
         }).then( j=>
             message.channel.send(j)
         )
