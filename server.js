@@ -111,8 +111,11 @@ client.on('message', (message) => {
                 if(level<50) {
                     return "Amethyst"
                 }
-                if(level>=50) {
+                if(level<60) {
                     return "Rainbow"
+                }
+                if(level>=60) {
+                    return "Mythic"
                 }
             }
             base = player.player.stats.SkyWars
@@ -131,69 +134,53 @@ client.on('message', (message) => {
                 {name: "KDR", value: Math.round(1000*(base.kills/base.deaths))/1000, inline: true}
             )
             return embed
-        } else if(gamemode=="Skyblock") {
-            let profs = []
+        }
+        if(gamemode=="Skyblock") {
+                let profs = []
+                const name_to_emoji = {
+                    apple: ":apple:",
+                    banana: ":banana:",
+                    blueberry: ":blue_circle:",
+                    coconut: ":coconut:",
+                    cucumber: ":cucumber:",
+                    grapes: ":grapes:",
+                    kiwi: ":kiwi:",
+                    lemon: ":lemon:",
+                    lime: ":lime:",
+                    mango: ":mango:",
+                    orange: ":tangerine:",
+                    papaya: ":melon:",
+                    peach: ":peach:",
+                    pear: ":pear:",
+                    pineapple: ":pineapple:",
+                    pomegranate: ":red_circle:",
+                    raspberry: "cherries",
+                    strawberry: ":strawberry:",
+                    tomato: ":tomato:",
+                    watermelon: ":watermelon:",
+                    zucchini: ":avocado:"
+                }
+            const newembed = new Discord.MessageEmbed()
             axios.get(`https://api.mojang.com/users/profiles/minecraft/${username}`).then(data=>{
             if(!data.status==200) {
                 let error = new Error(`Error mojang api returned a response code of ${data.status}.`)
                 throw error
             }
-            
+            console.log(player.player.stats.SkyBlock.profiles)
             for(let i in player.player.stats.SkyBlock.profiles) {
+                embed.setTitle(`Please pick a profile, ${username}.`)
                 var uuid = data.data.id;
-                
                 let id = player.player.stats.SkyBlock.profiles[i].profile_id
                 let name = player.player.stats.SkyBlock.profiles[i].cute_name
-                axios.get(`https://api.hypixel.net/skyblock/profile?key=${process.env.key}&profile=${id}`).then(res=>{
-                    if(!res.status==200) {
-                        let error = new Error(`Error hypixel api returned a response code of ${res.status}.`)
-                        throw error
-                    }
-                    
-                     let save = {
-                    last_save: res.data.profile.members[uuid].last_save,
-                    profile: id,
-                    data: res.data.profile,
-                    name: name,
-                    username: username
-                }
-                profs.push(save)
-                }
-                )
+                console.log(name)
+                embed.addField("Name", name)
+                console.log(embed)
+                //embed.addField(name_to_emoji[name.toLowerCase()], name)
             }
-            emitter.emit("profiles", profs)
-
+            message.channel.send(embed)
         })
-                emitter.on("profiles", profiles=>{ 
-                function compareSaves(x) {
-                    let n = 0
-                    for(var i=0; i<x.length; i++) {
-                        var removed = x.splice(i, 1)
-                    for(var j=0; j<removed.length; j++) {
-                        if(x[i].diff<j.diff) {
-                            n = n
-                        } else {
-                            n += 1
-                        }
-                    }
-                    }
-
-                    if(n=0){return x[i]}
-                }
-                if(profs.length>1) {
-                    console.log("Compared: "+profs.length+" profiles. "+compareSaves(profs))
-                } else if(profs.length==1) {
-                    console.log(profs[0])
-                } else {
-                    return "Error player has no profiles!"
-                }
-
-                })
-                
-            return "Currently under construction! :tools:"
         }
-        }).then( j=>
-            message.channel.send(j)
+        }).then(j=>{if(j)message.channel.send(j)}
         )
         .catch(
             error=>{
@@ -202,6 +189,8 @@ client.on('message', (message) => {
             }
         )
     }
+    //`https://api.hypixel.net/skyblock/profile?key=${process.env.key}&profile=${id}`
+    
     if(message.author.id=="402639792552017920"&&message.content=="s-test") {
         message.reply("test");
     }
