@@ -138,27 +138,50 @@ client.on('message', (message) => {
         if(gamemode=="Skyblock") {
                 let profs = []
                 const name_to_emoji = {
-                    apple: ":apple:",
-                    banana: ":banana:",
-                    blueberry: ":blue_circle:",
-                    coconut: ":coconut:",
-                    cucumber: ":cucumber:",
-                    grapes: ":grapes:",
-                    kiwi: ":kiwi:",
-                    lemon: ":lemon:",
-                    lime: ":lime:",
-                    mango: ":mango:",
-                    orange: ":tangerine:",
-                    papaya: ":melon:",
-                    peach: ":peach:",
-                    pear: ":pear:",
-                    pineapple: ":pineapple:",
-                    pomegranate: ":red_circle:",
-                    raspberry: "cherries",
-                    strawberry: ":strawberry:",
-                    tomato: ":tomato:",
-                    watermelon: ":watermelon:",
-                    zucchini: ":avocado:"
+                    apple: ":apple: ",
+                    banana: ":banana: ",
+                    blueberry: ":blue_circle: ",
+                    coconut: ":coconut: ",
+                    cucumber: ":cucumber: ",
+                    grapes: ":grapes: ",
+                    kiwi: ":kiwi: ",
+                    lemon: ":lemon: ",
+                    lime: ":lime: ",
+                    mango: ":mango: ",
+                    orange: ":tangerine: ",
+                    papaya: ":melon: ",
+                    peach: ":peach: ",
+                    pear: ":pear: ",
+                    pineapple: ":pineapple: ",
+                    pomegranate: ":red_circle: ",
+                    raspberry: ":cherries: ",
+                    strawberry: ":strawberry: ",
+                    tomato: ":tomato: ",
+                    watermelon: ":watermelon: ",
+                    zucchini: ":avocado: "
+                }
+                const emoji_to_char = {
+                    apple: "🍎",
+                    banana: ":banana: ",
+                    blueberry: ":blue_circle: ",
+                    coconut: ":coconut: ",
+                    cucumber: ":cucumber: ",
+                    grapes: ":grapes: ",
+                    kiwi: ":kiwi: ",
+                    lemon: ":lemon: ",
+                    lime: ":lime: ",
+                    mango: ":mango: ",
+                    orange: ":tangerine: ",
+                    papaya: ":melon: ",
+                    peach: ":peach: ",
+                    pear: ":pear: ",
+                    pineapple: ":pineapple: ",
+                    pomegranate: ":red_circle: ",
+                    raspberry: ":cherries: ",
+                    strawberry: ":strawberry: ",
+                    tomato: ":tomato: ",
+                    watermelon: ":watermelon: ",
+                    zucchini: ":avocado: "
                 }
             const newembed = new Discord.MessageEmbed()
             axios.get(`https://api.mojang.com/users/profiles/minecraft/${username}`).then(data=>{
@@ -166,18 +189,35 @@ client.on('message', (message) => {
                 let error = new Error(`Error mojang api returned a response code of ${data.status}.`)
                 throw error
             }
-            console.log(player.player.stats.SkyBlock.profiles)
+            let emojis = []
+            
             for(let i in player.player.stats.SkyBlock.profiles) {
                 embed.setTitle(`Please pick a profile, ${username}.`)
                 var uuid = data.data.id;
                 let id = player.player.stats.SkyBlock.profiles[i].profile_id
                 let name = player.player.stats.SkyBlock.profiles[i].cute_name
-                console.log(name)
-                embed.addField("Name", name)
-                console.log(embed)
-                //embed.addField(name_to_emoji[name.toLowerCase()], name)
+                embed.addField("** **",name_to_emoji[name.toLowerCase()]+name) 
+                emojis.push(name)
+                
             }
-            message.channel.send(embed)
+            console.log(emojis)
+            message.channel.send(embed).then(
+                mssg =>{
+                    const filter = (reaction, user) => {
+                        return user.id == message.author.id
+                    }
+                    for(i in emojis) {
+
+                    }
+                    mssg.awaitReactions(filter, {max: 1, time: 30000}).then(
+                        collected=>{
+                            const reaction = collected.first();
+                            if(!collected) return
+                            console.log(collected)
+                        }
+                    )
+                }
+            )
         })
         }
         }).then(j=>{if(j)message.channel.send(j)}
