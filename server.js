@@ -1,14 +1,19 @@
 const Discord = require("discord.js");
 const Enmap = require("enmap");
 const events = require("events")
+const levels = require("./skill_levels")
 const fs = require("fs-extra");
 const client = new Discord.Client();
 const hypixel = require("hypixel-api")
 const parser = require("discord-command-parser")
 const axios = require("axios")
+const nbt = require("prismarine-nbt")
 const token = process.env.TOKEN;
 const hyClient = new hypixel(process.env.key)
 const prefix = "s-"
+function getKeyByValue(object, value) {
+    return Object.keys(object).find(key => object[key] === value);
+  }
 function capitalize(s) {
     if(typeof s != "string") return
     return s.charAt(0).toUpperCase + s.slice(1);
@@ -50,7 +55,7 @@ client.on('message', (message) => {
             let base;
             embed = new Discord.MessageEmbed()
             .setColor("#6119a8")
-            .setFooter("© 2020 skillfully guild", "https://i.ibb.co/GMmBzLY/blue-and-purp.png")
+            .setFooter("© 2020 Skillfully Guild", "https://i.ibb.co/GMmBzLY/blue-and-purp.png")
             .setThumbnail("https://i.ibb.co/GMmBzLY/blue-and-purp.png")
             .setTitle(`Stats for ${username} in \`${gamemode}\``)
             .setTimestamp()
@@ -135,6 +140,7 @@ client.on('message', (message) => {
             )
             return embed
         }
+
         if(gamemode=="Skyblock") {
                 let profs = []
                 const name_to_emoji = {
@@ -146,7 +152,7 @@ client.on('message', (message) => {
                     grapes: ":grapes: ",
                     kiwi: ":kiwi: ",
                     lemon: ":lemon: ",
-                    lime: ":lime: ",
+                    lime: ":green_apple:",
                     mango: ":mango: ",
                     orange: ":tangerine: ",
                     papaya: ":melon: ",
@@ -162,26 +168,26 @@ client.on('message', (message) => {
                 }
                 const emoji_to_char = {
                     apple: "🍎",
-                    banana: ":banana: ",
-                    blueberry: ":blue_circle: ",
-                    coconut: ":coconut: ",
-                    cucumber: ":cucumber: ",
-                    grapes: ":grapes: ",
-                    kiwi: ":kiwi: ",
-                    lemon: ":lemon: ",
-                    lime: ":lime: ",
-                    mango: ":mango: ",
-                    orange: ":tangerine: ",
-                    papaya: ":melon: ",
-                    peach: ":peach: ",
-                    pear: ":pear: ",
-                    pineapple: ":pineapple: ",
-                    pomegranate: ":red_circle: ",
-                    raspberry: ":cherries: ",
-                    strawberry: ":strawberry: ",
-                    tomato: ":tomato: ",
-                    watermelon: ":watermelon: ",
-                    zucchini: ":avocado: "
+                    banana: "🍌",
+                    blueberry: "🔵",
+                    coconut: "🥥",
+                    cucumber: "🥒",
+                    grapes: "🍇",
+                    kiwi: "🥝",
+                    lemon: "🍋",
+                    lime: "🍏",
+                    mango: "🥭",
+                    orange: "🍊",
+                    papaya: "🍈",
+                    peach: "🍑",
+                    pear: "🍐",
+                    pineapple: "🍍",
+                    pomegranate: "🔴",
+                    raspberry: "🍒",
+                    strawberry: "🍓",
+                    tomato: "🍅",
+                    watermelon: "🍉",
+                    zucchini: "🥑"
                 }
             const newembed = new Discord.MessageEmbed()
             axios.get(`https://api.mojang.com/users/profiles/minecraft/${username}`).then(data=>{
@@ -189,31 +195,118 @@ client.on('message', (message) => {
                 let error = new Error(`Error mojang api returned a response code of ${data.status}.`)
                 throw error
             }
-            let emojis = []
             
+            let emojis = []
+            let chars = []
             for(let i in player.player.stats.SkyBlock.profiles) {
-                embed.setTitle(`Please pick a profile, ${username}.`)
+                embed.setTitle(`Please pick a profile for ${username}.`)
                 var uuid = data.data.id;
                 let id = player.player.stats.SkyBlock.profiles[i].profile_id
-                let name = player.player.stats.SkyBlock.profiles[i].cute_name
+                let name = player.player.stats.SkyBlock.profiles[i].cute_name.toLowerCase()
+                profs.push({
+                    name: name,
+                    id: id,
+                    player: uuid
+                })
                 embed.addField("** **",name_to_emoji[name.toLowerCase()]+name) 
                 emojis.push(name)
-                
             }
-            console.log(emojis)
             message.channel.send(embed).then(
                 mssg =>{
                     const filter = (reaction, user) => {
-                        return user.id == message.author.id
+                        return user.id == message.author.id&&chars.includes(reaction.emoji.name)
                     }
                     for(i in emojis) {
-
+                        mssg.react(emoji_to_char[emojis[i]])
+                        chars.push(emoji_to_char[emojis[i]])
                     }
-                    mssg.awaitReactions(filter, {max: 1, time: 30000}).then(
+                    mssg.awaitReactions(filter, {max: 1, time: 10000}).then(
                         collected=>{
                             const reaction = collected.first();
-                            if(!collected) return
-                            console.log(collected)
+                            if(collected.size == 0) {
+                        const userReactions = mssg.reactions.cache.filter(reaction => reaction.users.cache.has(client.user.id));
+                            try {
+	                            for (const reaction of userReactions.values()) {
+		                    reaction.users.remove(client.user.id);
+	                             }
+                         } catch (error) {
+	                        console.log('Failed to remove reactions.');
+                                   }
+                                   return
+                            } else {
+                           let pname = getKeyByValue(emoji_to_char, reaction.emoji.name)
+                            for(i in profs) {
+                                if(pname == profs[i].name) {
+                                    var pid =profs[i].id
+                                }
+                            }
+                    axios.get(`https://api.hypixel.net/skyblock/profile?key=${process.env.key}&profile=${pid}`).then(res=>{
+                            if(res.data.success!=true) {
+                                message.channel.send("An error occured!")
+                            }
+                            const embed = new Discord.MessageEmbed()
+                            let data = res.data.profile.members[uuid]
+                            try {
+                            var bal = Math.round(res.data.profile.banking.balance * 1000) / 1000
+                            var combat = levels.getLevelByXp(data.experience_skill_combat)
+                            var foraging = levels.getLevelByXp(data.experience_skill_foraging)
+                            var enchanting = levels.getLevelByXp(data.experience_skill_enchanting)
+                            var fishing = levels.getLevelByXp(data.experience_skill_fishing)
+                            var mining = levels.getLevelByXp(data.experience_skill_mining)
+                            var runecrafting = levels.getLevelByXp(data.experience_skill_runecrafting, true)
+                            var alch = levels.getLevelByXp(data.experience_skill_alchemy)
+                            var farming = levels.getLevelByXp(data.experience_skill_farming)
+                            var carpentry = levels.getLevelByXp(data.experience_skill_carpentry)
+                            var zombie = levels.getSlayerByXp(data.slayer_bosses.zombie.xp)
+                            var wolf = levels.getSlayerByXp(data.slayer_bosses.wolf.xp, true)
+                            var spider = levels.getSlayerByXp(data.slayer_bosses.spider.xp)
+                            } catch (error) {
+                        message.channel.send("Sorry, an error occured. Are you sure that player has api access enabled?")
+                        console.log(error)
+                        return null
+                            }
+                            embed
+                            .setTitle(`Skyblock stats for ${username}`)
+                            .setAuthor(`${client.user.tag}`, "https://i.ibb.co/GMmBzLY/blue-and-purp.png", "https://discord.gg/z3Z8dkE")
+                            .setColor("#6119a8")
+                            .setDescription("Stats might not be 100% accurate do to rounding.")
+                            .setThumbnail("https://i.ibb.co/GMmBzLY/blue-and-purp.png")
+                            .setFooter("© 2020 Skillfully Guild", "https://i.ibb.co/GMmBzLY/blue-and-purp.png")
+                            .addFields({
+                            name: "Combat", value: `Level: ${combat.level}`, inline: true},
+                            {name: "** **", value: `Current xp: ${combat.xp}, Next level in **${combat.next}** xp.`, inline: true},
+                            {name: "** **", value: "** **"},
+                            {name: "Alchemy", value: `Level: ${alch.level}`, inline: true},
+                            {name: "** **", value: `Current xp: ${alch.xp}, Next level in **${alch.next}** xp.`, inline: true},
+                            {name: "** **", value: "** **"},
+                            {name: "Mining", value: `Level: ${mining.level}`, inline: true},
+                            {name: "** **", value: `Current xp: ${mining.xp}, Next level in **${mining.next}** xp.`, inline: true},
+                            {name: "** **", value: "** **"},
+                            {name: "Farming", value: `Level: ${farming.level}`, inline: true},
+                            {name: "** **", value: `Current xp: ${farming.xp}, Next level in **${farming.next}** xp.`, inline: true},
+                            {name: "** **", value: "** **"},
+                            {name: "Carpentry", value: `Level: ${carpentry.level}`, inline: true},
+                            {name: "** **", value: `Current xp: ${carpentry.xp}, Next level in **${carpentry.next}** xp.`, inline: true},
+                            {name: "** **", value: "** **"},
+                            {name: "Foraging", value: `Level: ${foraging.level}`, inline: true},
+                            {name: "** **", value: `Current xp: ${foraging.xp}, Next level in **${foraging.next}** xp.`, inline: true},
+                            {name: "** **", value: "** **"},
+                            {name: "Fishing", value: `Level: ${fishing.level}`, inline: true},
+                            {name: "** **", value: `Current xp: ${fishing.xp}, Next level in **${fishing.next}** xp.`, inline: true},
+                            {name: "** **", value: "** **"},
+                            {name: "Enchanting", value: `Level: ${enchanting.level}`, inline: true},
+                            {name: "** **", value: `Current xp: ${enchanting.xp}, Next level in **${enchanting.next}** xp.`, inline: true},
+                            {name: "** **", value: "** **"},
+                            {name: "Runecrafting", value: `Level: ${runecrafting.level}`, inline: true},
+                            {name: "** **", value: `Current xp: ${runecrafting.xp}, Next level in **${runecrafting.next}** xp.`, inline: true}
+                            )
+                            return embed
+                    }).then(embed=>{
+                        if(embed) message.channel.send(embed)
+                        else return null
+                    })
+                            
+                        }
                         }
                     )
                 }
