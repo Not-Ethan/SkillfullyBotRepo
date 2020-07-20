@@ -77,14 +77,15 @@ module.exports = {
             21: 7800,
             22: 9800,
             23: 12200,
-            24: 15300
+            24: 15300 
     },
     getLevelByXp(xp, runecrafting) {
         let level
         let current
         let next
         let xpTable
-        xp = Math.round(xp)
+        let max = (runecrafting) ? 15300 : 4000000
+        xp = Math.round(xp*100)/100
         if(runecrafting) {
             xpTable = this.runecraftingXp
         } else {
@@ -99,7 +100,7 @@ module.exports = {
             }
         }
         for(i in xpTable) {
-            if(xpTable[i]<xp) {
+            if(xpTable[i]<xp&&xp<max) {
                 xp -= xpTable[i]
             } else {
             if(xpTable[i]>=xp) {
@@ -134,6 +135,7 @@ module.exports = {
             if(xpTable[i]>=xp) {
                 level = i-1
                 next = xpTable[i] - xp
+                break
             }
         }
         return {

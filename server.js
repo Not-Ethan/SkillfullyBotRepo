@@ -1,6 +1,9 @@
 const Discord = require("discord.js");
 const Enmap = require("enmap");
 const events = require("events")
+const Rev = require("./rev.js")
+const Taran = require("./tara.js")
+const Wolf = require("./wolf.js")
 const levels = require("./skill_levels")
 const fs = require("fs-extra");
 const client = new Discord.Client();
@@ -234,7 +237,7 @@ client.on('message', (message) => {
                                    }
                                    return
                             } else {
-                           let pname = getKeyByValue(emoji_to_char, reaction.emoji.name)
+                           var pname = getKeyByValue(emoji_to_char, reaction.emoji.name)
                             for(i in profs) {
                                 if(pname == profs[i].name) {
                                     var pid =profs[i].id
@@ -246,60 +249,68 @@ client.on('message', (message) => {
                             }
                             const embed = new Discord.MessageEmbed()
                             let data = res.data.profile.members[uuid]
+                            console.log(res.data.profile.members[uuid].experience_skill_alchemy)
                             try {
-                            var bal = Math.round(res.data.profile.banking.balance * 1000) / 1000
-                            var combat = levels.getLevelByXp(data.experience_skill_combat)
-                            var foraging = levels.getLevelByXp(data.experience_skill_foraging)
-                            var enchanting = levels.getLevelByXp(data.experience_skill_enchanting)
-                            var fishing = levels.getLevelByXp(data.experience_skill_fishing)
-                            var mining = levels.getLevelByXp(data.experience_skill_mining)
-                            var runecrafting = levels.getLevelByXp(data.experience_skill_runecrafting, true)
-                            var alch = levels.getLevelByXp(data.experience_skill_alchemy)
-                            var farming = levels.getLevelByXp(data.experience_skill_farming)
-                            var carpentry = levels.getLevelByXp(data.experience_skill_carpentry)
-                            var zombie = levels.getSlayerByXp(data.slayer_bosses.zombie.xp)
-                            var wolf = levels.getSlayerByXp(data.slayer_bosses.wolf.xp, true)
-                            var spider = levels.getSlayerByXp(data.slayer_bosses.spider.xp)
+                            if(res.data.profile.banking)var bal = Math.round(res.data.profile.banking.balance * 1000) / 1000
+                            else var bal = "N/A"
+                            if(data.experience_skill_combat)var combat =levels.getLevelByXp(data.experience_skill_combat)
+                            else var combat = {level: "N/A", current: "N/A", next: "N/A"}
+                            if(data.experience_skill_foraging)var foraging =levels.getLevelByXp(data.experience_skill_foraging)
+                            else var foraging = {level: "N/A", current: "N/A", next: "N/A"}
+                            if(data.experience_skill_enchanting)var enchanting = levels.getLevelByXp(data.experience_skill_enchanting)
+                            else var enchanting = {level: "N/A", current: "N/A", next: "N/A"}
+                            if(data.experience_skill_fishing)var fishing =levels.getLevelByXp(data.experience_skill_fishing)
+                            else var fishing = {level: "N/A", current: "N/A", next: "N/A"}
+                            if(data.experience_skill_mining)var mining =levels.getLevelByXp(data.experience_skill_mining)
+                            else var mining = {level: "N/A", current: "N/A", next: "N/A"}
+                            if(data.experience_skill_runecrafting)var runecrafting =levels.getLevelByXp(data.experience_skill_runecrafting, true)
+                            else var runecrafting = {level: "N/A", current: "N/A", next: "N/A"}
+                            if(data.experience_skill_alchemy)var alch = levels.getLevelByXp(data.experience_skill_alchemy)
+                            else var alch = {level: "N/A", current: "N/A", next: "N/A"}
+                            if(data.experience_skill_farming)var farming = levels.getLevelByXp(data.experience_skill_farming)
+                            else var farming = {level: "N/A", current: "N/A", next: "N/A"}
+                            if(data.experience_skill_carpentry)var carpentry = levels.getLevelByXp(data.experience_skill_carpentry)
+                            else var carpentry = {level: "N/A", current: "N/A", next: "N/A"}
+                            if(data.slayer_bosses.zombie.xp)var zombie =levels.getSlayerByXp(data.slayer_bosses.zombie.xp)
+                            else var zombie = {level: "N/A", current: "N/A", next: "N/A"}
+                            if(data.slayer_bosses.wolf.xp)var wolf = levels.getSlayerByXp(data.slayer_bosses.wolf.xp, true)
+                            else var wolf = {level: "N/A", current: "N/A", next: "N/A"}
+                            if(data.slayer_bosses.spider.xp)var spider = levels.getSlayerByXp(data.slayer_bosses.spider.xp)
+                            else var spider = {level: "N/A", current: "N/A", next: "N/A"}
+                            if(!data.experience_skill_combat||!data.slayer_bosses.zombie.xp) throw new Error("Api disabled/info missing")
                             } catch (error) {
-                        message.channel.send("Sorry, an error occured. Are you sure that player has api access enabled?")
+                        message.channel.send("Sorry, an error occured. Some data is missing and will not be included.")
                         console.log(error)
-                        return null
                             }
+                            if(!data.fairy_souls_collected) data.fairy_souls_collected = 0
+                            mssg.delete()
                             embed
-                            .setTitle(`Skyblock stats for ${username}`)
+                            .setTitle(`Skyblock stats for ${username} on ${pname}`)
                             .setAuthor(`${client.user.tag}`, "https://i.ibb.co/GMmBzLY/blue-and-purp.png", "https://discord.gg/z3Z8dkE")
                             .setColor("#6119a8")
-                            .setDescription("Stats might not be 100% accurate do to rounding.")
+                            .setDescription("Stats might not be 100% accurate due to rounding.")
                             .setThumbnail("https://i.ibb.co/GMmBzLY/blue-and-purp.png")
+                            .setTimestamp()
                             .setFooter("© 2020 Skillfully Guild", "https://i.ibb.co/GMmBzLY/blue-and-purp.png")
-                            .addFields({
-                            name: "Combat", value: `Level: ${combat.level}`, inline: true},
-                            {name: "** **", value: `Current xp: ${combat.xp}, Next level in **${combat.next}** xp.`, inline: true},
-                            {name: "** **", value: "** **"},
-                            {name: "Alchemy", value: `Level: ${alch.level}`, inline: true},
-                            {name: "** **", value: `Current xp: ${alch.xp}, Next level in **${alch.next}** xp.`, inline: true},
-                            {name: "** **", value: "** **"},
-                            {name: "Mining", value: `Level: ${mining.level}`, inline: true},
-                            {name: "** **", value: `Current xp: ${mining.xp}, Next level in **${mining.next}** xp.`, inline: true},
-                            {name: "** **", value: "** **"},
-                            {name: "Farming", value: `Level: ${farming.level}`, inline: true},
-                            {name: "** **", value: `Current xp: ${farming.xp}, Next level in **${farming.next}** xp.`, inline: true},
-                            {name: "** **", value: "** **"},
-                            {name: "Carpentry", value: `Level: ${carpentry.level}`, inline: true},
-                            {name: "** **", value: `Current xp: ${carpentry.xp}, Next level in **${carpentry.next}** xp.`, inline: true},
-                            {name: "** **", value: "** **"},
-                            {name: "Foraging", value: `Level: ${foraging.level}`, inline: true},
-                            {name: "** **", value: `Current xp: ${foraging.xp}, Next level in **${foraging.next}** xp.`, inline: true},
-                            {name: "** **", value: "** **"},
-                            {name: "Fishing", value: `Level: ${fishing.level}`, inline: true},
-                            {name: "** **", value: `Current xp: ${fishing.xp}, Next level in **${fishing.next}** xp.`, inline: true},
-                            {name: "** **", value: "** **"},
-                            {name: "Enchanting", value: `Level: ${enchanting.level}`, inline: true},
-                            {name: "** **", value: `Current xp: ${enchanting.xp}, Next level in **${enchanting.next}** xp.`, inline: true},
-                            {name: "** **", value: "** **"},
-                            {name: "Runecrafting", value: `Level: ${runecrafting.level}`, inline: true},
-                            {name: "** **", value: `Current xp: ${runecrafting.xp}, Next level in **${runecrafting.next}** xp.`, inline: true}
+                            .addFields(
+                                {name: "Bank Balance", value: Math.round(bal * 100)/100 + " coins"},
+                            {
+                            name: "Combat :crossed_swords:", value: `Level: ${combat.level}`, inline: true},
+                            {name: "Alchemy :alembic:", value: `Level: ${alch.level}`, inline: true},
+                            {name: "Mining :pick:", value: `Level: ${mining.level}`, inline: true},
+                            {name: "Farming :bread:", value: `Level: ${farming.level}`, inline: true},
+                            {name: "Carpentry :tools:", value: `Level: ${carpentry.level}`, inline: true},
+                            {name: "Foraging :axe:", value: `Level: ${foraging.level}`, inline: true},
+                            {name: "Fishing :fishing_pole_and_fish:", value: `Level: ${fishing.level}`, inline: true},
+                            {name: "Enchanting :book:", value: `Level: ${enchanting.level}`, inline: true},
+                            {name: "Runecrafting :sparkler:", value: `Level: ${runecrafting.level}`, inline: true},
+                            {name: "Slayers :bow_and_arrow:", value: "\u200b"},
+                            {name: "Zombie :zombie:", value: `Level: ${zombie.level}, \n Next level in ${zombie.next} xp.`, inline: true},
+                            {name: "Spider :spider:", value: `Level: ${spider.level}, \n Next level in ${spider.next} xp.`, inline: true},
+                            {name: "Wolf :wolf:", value: `Level ${wolf.level}, Next \n level in ${wolf.next} xp.`, inline: true},
+                            {name: ":heartpulse: Fairy Souls: ", value: `${data.fairy_souls_collected}/206`}
                             )
+                            
                             return embed
                     }).then(embed=>{
                         if(embed) message.channel.send(embed)
@@ -321,6 +332,63 @@ client.on('message', (message) => {
                     message.channel.send("An error occured, are you sure that player exists?")
             }
         )
+    } else if(message.content.startsWith(`${prefix}slayer`)) {
+        const args = message.content.split(" ").slice(1)
+        const slayer = args[0]
+        if(!args[2]||isNaN(parseInt(args[2]))) {
+            args.push(0)
+            message.channel.send("No magic find was specified so it defaults to 0.").then(msg=>msg.delete({timeout: 5000}))
+        }
+        let magic = parseInt(args[2])
+        let count = args[1]>10000 ? 10000 : args[1]
+        const embed = new Discord.MessageEmbed()
+        .setTitle(`Results of ${count} bosses using ${magic}% magic find.`)
+        .setTimestamp()
+        .setFooter("© 2020 Skillfully Guild", "https://i.ibb.co/GMmBzLY/blue-and-purp.png")
+        .setThumbnail("https://i.ibb.co/GMmBzLY/blue-and-purp.png")
+        if(slayer.toLowerCase()=="rev" || slayer.toLowerCase()=="zombie") {
+            let totals = {
+                flesh: 0, 
+                foul: 0, 
+                pest: 0,
+                undead: 0,
+                smite: 0,
+                droppedFoul: 0,
+                revCata: 0,
+                snake: 0,
+                horror: 0,
+                scythe: 0,
+                rares: 0,
+                sell: 0
+              }
+            for(var i = 0; i<count; i++){
+                let rev = new Rev(magic)
+                rev.getDrops()
+                totals.sell += rev.sell
+                if(rev.rare) {
+                    totals.rares += 1
+                }
+                for(drop in rev.drops) {
+                    totals[drop] += parseInt(rev.drops[drop])
+                }
+            }
+            embed.addFields(
+                {name:"Profit", value: totals.sell - 50000*count + " coins"},
+                {name: "Total rare drops obtained (1% chance or under):", value: totals.rares},
+                {name: "Revenant flesh", value: totals.flesh, inline: true},
+                {name: "Foul flesh", value: totals.foul, inline: true},
+                {name: "Pest. Rune", value: totals.pest, inline: true},
+                {name: "Undead catalysts", value: totals.undead, inline: true},
+                {name: "Smite VI book", value: totals.smite, inline: true},
+                {name: "Rev. catalysts", value: totals.revCata, inline: true},
+                {name: "Beheaded Horrors", value: totals.horror, inline: true},
+                {name: "Snake Runes", value: totals.snake, inline: true},
+                {name: "Scythe Blades", value: totals.scythe, inline: true}
+            )
+            message.channel.send(embed)
+        } else if(slayer.toLowerCase().startsWith("tara")||slayer.toLowerCase()=="spider") {
+            
+        }
     }
     //`https://api.hypixel.net/skyblock/profile?key=${process.env.key}&profile=${id}`
     
