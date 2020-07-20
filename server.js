@@ -249,7 +249,6 @@ client.on('message', (message) => {
                             }
                             const embed = new Discord.MessageEmbed()
                             let data = res.data.profile.members[uuid]
-                            console.log(res.data.profile.members[uuid].experience_skill_alchemy)
                             try {
                             if(res.data.profile.banking)var bal = Math.round(res.data.profile.banking.balance * 1000) / 1000
                             else var bal = "N/A"
@@ -265,6 +264,8 @@ client.on('message', (message) => {
                             else var mining = {level: "N/A", current: "N/A", next: "N/A"}
                             if(data.experience_skill_runecrafting)var runecrafting =levels.getLevelByXp(data.experience_skill_runecrafting, true)
                             else var runecrafting = {level: "N/A", current: "N/A", next: "N/A"}
+                            if(data.experience_skill_taming)var taming = levels.getLevelByXp(data.experience_skill_taming)
+                            else var taming = {level: "N/A", current: "N/A", next: "N/A"}
                             if(data.experience_skill_alchemy)var alch = levels.getLevelByXp(data.experience_skill_alchemy)
                             else var alch = {level: "N/A", current: "N/A", next: "N/A"}
                             if(data.experience_skill_farming)var farming = levels.getLevelByXp(data.experience_skill_farming)
@@ -284,11 +285,13 @@ client.on('message', (message) => {
                             }
                             if(!data.fairy_souls_collected) data.fairy_souls_collected = 0
                             mssg.delete()
+                            const asl = (foraging) ? Math.round(((alch.level + combat.level + enchanting.level + fishing.level
+                            + mining.level + farming.level + foraging.level+taming.level)/8)*1000)/1000 : "N/A"
                             embed
                             .setTitle(`Skyblock stats for ${username} on ${pname}`)
                             .setAuthor(`${client.user.tag}`, "https://i.ibb.co/GMmBzLY/blue-and-purp.png", "https://discord.gg/z3Z8dkE")
                             .setColor("#6119a8")
-                            .setDescription("Stats might not be 100% accurate due to rounding.")
+                            .setDescription("Stats might not be 100% accurate due to rounding. Partial progress is not taken into account when calculating average skill levels.")
                             .setThumbnail("https://i.ibb.co/GMmBzLY/blue-and-purp.png")
                             .setTimestamp()
                             .setFooter("© 2020 Skillfully Guild", "https://i.ibb.co/GMmBzLY/blue-and-purp.png")
@@ -299,15 +302,17 @@ client.on('message', (message) => {
                             {name: "Alchemy :alembic:", value: `Level: ${alch.level}`, inline: true},
                             {name: "Mining :pick:", value: `Level: ${mining.level}`, inline: true},
                             {name: "Farming :bread:", value: `Level: ${farming.level}`, inline: true},
-                            {name: "Carpentry :tools:", value: `Level: ${carpentry.level}`, inline: true},
+                            {name: "Carpentry :hammer:", value: `Level: ${carpentry.level}`, inline: true},
                             {name: "Foraging :axe:", value: `Level: ${foraging.level}`, inline: true},
                             {name: "Fishing :fishing_pole_and_fish:", value: `Level: ${fishing.level}`, inline: true},
                             {name: "Enchanting :book:", value: `Level: ${enchanting.level}`, inline: true},
+                            {name: "Taming :bone:", value: `Level: ${taming.level}`, inline: true},
                             {name: "Runecrafting :sparkler:", value: `Level: ${runecrafting.level}`, inline: true},
+                            {name: "Average Skill Level :tools:", value: asl},
                             {name: "Slayers :bow_and_arrow:", value: "\u200b"},
-                            {name: "Zombie :zombie:", value: `Level: ${zombie.level}, \n Next level in ${zombie.next} xp.`, inline: true},
-                            {name: "Spider :spider:", value: `Level: ${spider.level}, \n Next level in ${spider.next} xp.`, inline: true},
-                            {name: "Wolf :wolf:", value: `Level ${wolf.level}, Next \n level in ${wolf.next} xp.`, inline: true},
+                            {name: "Zombie :zombie:", value: `Level: ${zombie.level}, \n Next level in ${zombie.next} xp.(${data.slayer_bosses.zombie.xp})`, inline: true},
+                            {name: "Spider :spider:", value: `Level: ${spider.level}, \n Next level in ${spider.next} xp.(${data.slayer_bosses.spider.xp})`, inline: true},
+                            {name: "Wolf :wolf:", value: `Level ${wolf.level}, Next \n level in ${wolf.next} xp.(${data.slayer_bosses.wolf.xp})`, inline: true},
                             {name: ":heartpulse: Fairy Souls: ", value: `${data.fairy_souls_collected}/206`}
                             )
                             
@@ -329,6 +334,7 @@ client.on('message', (message) => {
         .catch(
             error=>{
                 if(error) console.log(error)
+                console.log(error=="SyntaxError: Unexpected token < in JSON at position 0")
                     message.channel.send("An error occured, are you sure that player exists?")
             }
         )

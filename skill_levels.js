@@ -84,7 +84,7 @@ module.exports = {
         let current
         let next
         let xpTable
-        let max = (runecrafting) ? 15300 : 4000000
+        let max = (runecrafting) ? 94450 : 55172425
         xp = Math.round(xp*100)/100
         if(runecrafting) {
             xpTable = this.runecraftingXp
@@ -108,7 +108,7 @@ module.exports = {
                 next = xpTable[i] - xp
                 break
             } else {
-                if(!runecrafting&&xp>=4000000) {
+                if(!runecrafting&&xp>=55172425) {
                     level = 50
                     current = xp - 4000000
                     next = "N/A"
