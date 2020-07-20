@@ -248,7 +248,11 @@ client.on('message', (message) => {
                                 message.channel.send("An error occured!")
                             }
                             const embed = new Discord.MessageEmbed()
-                            let data = res.data.profile.members[uuid]
+                            try {
+                            var data = res.data.profile.members[uuid]}
+                            catch {message.channel.send("An error occured, please try again!")
+                            return
+                        }
                             try {
                             if(res.data.profile.banking)var bal = Math.round(res.data.profile.banking.balance * 1000) / 1000
                             else var bal = "N/A"
