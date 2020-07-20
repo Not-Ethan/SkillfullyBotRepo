@@ -338,7 +338,7 @@ client.on('message', (message) => {
         .catch(
             error=>{
                 if(error) console.log(error)
-                console.log(error=="SyntaxError: Unexpected token < in JSON at position 0")
+                if(error=="SyntaxError: Unexpected token < in JSON at position 0") {message.channel.send("Hypixel api might be down right now. Try again later.")} else
                     message.channel.send("An error occured, are you sure that player exists?")
             }
         )
