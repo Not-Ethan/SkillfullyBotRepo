@@ -355,10 +355,11 @@ try {
         let count = args[1]>10000 ? 10000 : args[1]
         const embed = new Discord.MessageEmbed()
         .setTitle(`Results of ${count} bosses using ${magic}% magic find.`)
+        .setDescription("All rngesus drop chances are pure speculation and may not reflect actual chances in game.")
         .setTimestamp()
         .setFooter("© 2020 Skillfully Guild", "https://i.ibb.co/GMmBzLY/blue-and-purp.png")
         .setThumbnail("https://i.ibb.co/GMmBzLY/blue-and-purp.png")
-        if(slayer.toLowerCase()=="rev" || slayer.toLowerCase()=="zombie") {
+        if(slayer.toLowerCase().startsWith("rev") || slayer.toLowerCase()=="zombie") {
             let totals = {
                 flesh: 0, 
                 foul: 0, 
@@ -399,7 +400,51 @@ try {
             )
             message.channel.send(embed)
         } else if(slayer.toLowerCase().startsWith("tara")||slayer.toLowerCase()=="spider") {
-            
+            let totals = {
+                web: 0,
+                toxic: 0,
+                bite: 0,
+                spider: 0,
+                bane: 0,
+                fly: 0,
+                tarantula: 0,
+                digmosq: 0,
+                rares: 0,
+                sell: 0,
+                droppedToxic: 0
+              }
+            for(var i = 0; i<count; i++) {
+                let newTara = new Taran(magic)
+                newTara.getDrops()
+                totals.web += newTara.drops.web
+                totals.toxic += newTara.drops.toxic
+                totals.bite += newTara.drops.bite
+                totals.spider += newTara.drops.spider
+                totals.bane += newTara.drops.bane
+                totals.fly += newTara.drops.fly
+                totals.tarantula += newTara.drops.tarantula
+                totals.digmosq += newTara.drops.digmosq
+                if(newTara.drops.toxic != 0) {
+                  totals.droppedToxic += 1
+                }
+                if(newTara.rare) {
+                  totals.rares += 1
+                }
+                totals.sell += newTara.sell
+            }
+            embed.addFields(
+                {name:"Profit", value: totals.sell - 50000*count + " coins"},
+                {name: "Total rare drops obtained (1% chance or under):", value: totals.rares},
+                {name: "Tarantula web", value: totals.web, inline: true},
+                {name: "Toxic arrow poison", value: totals.toxic, inline: true},
+                {name: "Bite Rune", value: totals.bite, inline: true},
+                {name: "Spider catalysts", value: totals.spider, inline: true},
+                {name: "Bane VI book", value: totals.bane, inline: true},
+                {name: "Flyswatters", value: totals.fly, inline: true},
+                {name: "Tarantula talismans", value: totals.tarantula, inline: true},
+                {name: "Digested Mosquitoes", value: totals.digmosq, inline: true}
+            )
+            message.channel.send(embed)
         }
     }
     //`https://api.hypixel.net/skyblock/profile?key=${process.env.key}&profile=${id}`
@@ -409,12 +454,14 @@ try {
     }
 }catch (err){
     const date = new Date(Date.now())
+    console.log(err)
     let obj = {
         time: date,
         author: message.author.tag,
-        content: message.content
+        content: message.content,
+        error: err.toString()
     }
-    console.log("j")
+    console.log("new error")
     fs.writeJSON('./logs.json', obj, error=>{
         if(error) {console.log(error)}
     })
