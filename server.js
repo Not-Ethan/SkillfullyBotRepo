@@ -37,6 +37,7 @@ client.on('ready', () => {
     })
 });
 client.on('message', (message) => {
+try {
     const gamemodes = {
         bw: "Bedwars",
         sw: "Skywars",
@@ -406,5 +407,16 @@ client.on('message', (message) => {
     if(message.author.id=="402639792552017920"&&message.content=="s-test") {
         message.reply("test");
     }
-});
+}catch (err){
+    const date = new Date(Date.now())
+    let obj = {
+        time: date,
+        author: message.author.tag,
+        content: message.content
+    }
+    console.log("j")
+    fs.writeJSON('./logs.json', obj, error=>{
+        if(error) {console.log(error)}
+    })
+}});
 client.login(token);
