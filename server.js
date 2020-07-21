@@ -36,6 +36,9 @@ client.on('ready', () => {
         type: "WATCHING"
     })
 });
+client.once('ready', ()=>{
+    fs.writeJSON("./logs.json", {event: "logged in", time: new Date(Date.now())})
+})
 client.on('message', (message) => {
 try {
     const gamemodes = {
@@ -346,16 +349,23 @@ try {
         )
     } else if(message.content.startsWith(`${prefix}slayer`)) {
         const args = message.content.split(" ").slice(1)
-        const slayer = args[0]
+        let countoverride
+        if(!args[0]) return message.channel.send("You didnt specify a slayer.")
+        const slayer = args[0].toLowerCase()
+        if(!args[1]||isNaN(parseInt(args[1]))) {
+            return message.channel.send("You didnt specify an amount.")
+        }
         if(!args[2]||isNaN(parseInt(args[2]))) {
             args.push(0)
             message.channel.send("No magic find was specified so it defaults to 0.").then(msg=>msg.delete({timeout: 5000}))
         }
         let magic = parseInt(args[2])
-        let count = args[1]>10000 ? 10000 : args[1]
+        if(magic>1000) magic=1000
+        if(!countoverride)var count = (args[1]>10000) ? 10000 : args[1]
+        else var count = 1
         const embed = new Discord.MessageEmbed()
         .setTitle(`Results of ${count} bosses using ${magic}% magic find.`)
-        .setDescription("All rngesus drop chances are pure speculation and may not reflect actual chances in game.")
+        .setDescription("All rngesus drop chances are pure speculation and may not reflect actual chances in game. Maximum amount is 10000. Max magic find is 1000")
         .setTimestamp()
         .setFooter("© 2020 Skillfully Guild", "https://i.ibb.co/GMmBzLY/blue-and-purp.png")
         .setThumbnail("https://i.ibb.co/GMmBzLY/blue-and-purp.png")
@@ -446,6 +456,11 @@ try {
             )
             message.channel.send(embed)
         }
+        if(slayer.toLowerCase()=="wolf" || slayer.toLowerCase().startsWith("sven")) {
+            for(var i = 0; i<count; i++) {
+                let newSven = new Wolf(magic)
+            }
+        }
     }
     //`https://api.hypixel.net/skyblock/profile?key=${process.env.key}&profile=${id}`
     
@@ -461,7 +476,7 @@ try {
         content: message.content,
         error: err.toString()
     }
-    console.log("new error")
+    console.log("error detected and logged")
     fs.writeJSON('./logs.json', obj, error=>{
         if(error) {console.log(error)}
     })
