@@ -14,6 +14,9 @@ const nbt = require("prismarine-nbt")
 const token = process.env.TOKEN;
 const hyClient = new hypixel(process.env.key)
 const prefix = "s-"
+Number.prototype.format = function(){
+    return this.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+ };
 function getKeyByValue(object, value) {
     return Object.keys(object).find(key => object[key] === value);
   }
@@ -37,21 +40,26 @@ client.on('ready', () => {
     })
 });
 client.once('ready', ()=>{
-    fs.writeJSON("./logs.json", {event: "logged in", time: new Date(Date.now())})
+    const obj = {event: "logged in", time: new Date(Date.now())}
+    fs.appendFile("./logs.txt", JSON.stringify(obj), ()=>{
+        return
+    })
 })
 client.on('message', (message) => {
 try {
-    const gamemodes = {
+
+    if(message.author.bot==true) return
+    if(message.content.startsWith(`${prefix}stats`)) {
+        if(message.channel.id!="713485578150084688") return message.author.send("Sorry but you cant use that command here.")
+        const args = message.content.split(" ").slice(1)
+        const username = args[0]
+        let gamemode = args[1]
+        const gamemodes = {
         bw: "Bedwars",
         sw: "Skywars",
         sb: "Skyblock"
     }
     const gamemodes2 = ["Bedwars", "Skywars", "Skyblock"]
-    if(message.author.bot==true) return
-    if(message.content.startsWith(`${prefix}stats`)) {
-        const args = message.content.split(" ").slice(1)
-        const username = args[0]
-        let gamemode = args[1]
         if(!gamemode) return message.channel.send(`You need to specify a gamemode ${message.author}.`)
         if(!gamemodes.hasOwnProperty(gamemode.toLowerCase())&&!gamemodes2.includes(capitalize(gamemode))) return message.channel.send(`Please choose a proper gamemode, ${message.author}.`)
         if(gamemodes.hasOwnProperty(gamemode.toLowerCase())) {
@@ -396,17 +404,18 @@ try {
                 }
             }
             embed.addFields(
-                {name:"Profit", value: totals.sell - 50000*count + " coins"},
+                {name:"Profit", value: (totals.sell - 50000*count).format() + " coins"},
+                {name: "Cost", value: (50000*count).format()},
                 {name: "Total rare drops obtained (1% chance or under):", value: totals.rares},
-                {name: "Revenant flesh", value: totals.flesh, inline: true},
-                {name: "Foul flesh", value: totals.foul, inline: true},
-                {name: "Pest. Rune", value: totals.pest, inline: true},
-                {name: "Undead catalysts", value: totals.undead, inline: true},
-                {name: "Smite VI book", value: totals.smite, inline: true},
-                {name: "Rev. catalysts", value: totals.revCata, inline: true},
-                {name: "Beheaded Horrors", value: totals.horror, inline: true},
-                {name: "Snake Runes", value: totals.snake, inline: true},
-                {name: "Scythe Blades", value: totals.scythe, inline: true}
+                {name: "Revenant flesh", value: totals.flesh.format(), inline: true},
+                {name: "Foul flesh", value: totals.foul.format(), inline: true},
+                {name: "Pest. Rune", value: totals.pest.format(), inline: true},
+                {name: "Undead catalysts", value: totals.undead.format(), inline: true},
+                {name: "Smite VI book", value: totals.smite.format(), inline: true},
+                {name: "Rev. catalysts", value: totals.revCata.format(), inline: true},
+                {name: "Beheaded Horrors", value: totals.horror.format(), inline: true},
+                {name: "Snake Runes", value: totals.snake.format(), inline: true},
+                {name: "Scythe Blades", value: totals.scythe.format(), inline: true}
             )
             message.channel.send(embed)
         } else if(slayer.toLowerCase().startsWith("tara")||slayer.toLowerCase()=="spider") {
@@ -443,22 +452,31 @@ try {
                 totals.sell += newTara.sell
             }
             embed.addFields(
-                {name:"Profit", value: totals.sell - 50000*count + " coins"},
-                {name: "Total rare drops obtained (1% chance or under):", value: totals.rares},
-                {name: "Tarantula web", value: totals.web, inline: true},
-                {name: "Toxic arrow poison", value: totals.toxic, inline: true},
-                {name: "Bite Rune", value: totals.bite, inline: true},
-                {name: "Spider catalysts", value: totals.spider, inline: true},
-                {name: "Bane VI book", value: totals.bane, inline: true},
-                {name: "Flyswatters", value: totals.fly, inline: true},
-                {name: "Tarantula talismans", value: totals.tarantula, inline: true},
-                {name: "Digested Mosquitoes", value: totals.digmosq, inline: true}
+                {name:"Profit", value: (totals.sell - 50000*count).format() + " coins"},
+                {name: "Cost", value: (50000*count).format()},
+                {name: "Total rare drops obtained (1% chance or under):", value: totals.rares.format()},
+                {name: "Tarantula web", value: totals.web.format(), inline: true},
+                {name: "Toxic arrow poison", value: totals.toxic.format(), inline: true},
+                {name: "Bite Rune", value: totals.bite.format(), inline: true},
+                {name: "Spider catalysts", value: totals.spider.format(), inline: true},
+                {name: "Bane VI book", value: totals.bane.format(), inline: true},
+                {name: "Flyswatters", value: totals.fly.format(), inline: true},
+                {name: "Tarantula talismans", value: totals.tarantula.format(), inline: true},
+                {name: "Digested Mosquitoes", value: totals.digmosq.format(), inline: true}
             )
             message.channel.send(embed)
         }
         if(slayer.toLowerCase()=="wolf" || slayer.toLowerCase().startsWith("sven")) {
             for(var i = 0; i<count; i++) {
+                const totals = {
+                    sell: 0,
+                    teeth: 0,
+                    wheel: 0,
+
+                }
                 let newSven = new Wolf(magic)
+                newSven.getDrops()
+                
             }
         }
     }
@@ -471,13 +489,13 @@ try {
     const date = new Date(Date.now())
     console.log(err)
     let obj = {
-        time: date,
-        author: message.author.tag,
-        content: message.content,
-        error: err.toString()
+        event: "error",
+        time: date+"\n",
+        author: message.author.tag+"\n",
+        content: message.content+"\n",
+        error: err.toString() + '\n'
     }
-    console.log("error detected and logged")
-    fs.writeJSON('./logs.json', obj, error=>{
+    fs.appendFile('./logs.txt', JSON.stringify(obj) + '\n', error=>{
         if(error) {console.log(error)}
     })
 }});
