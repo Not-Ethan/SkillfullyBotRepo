@@ -13,7 +13,21 @@ const axios = require("axios")
 const nbt = require("prismarine-nbt")
 const token = process.env.TOKEN;
 const hyClient = new hypixel(process.env.key)
-const prefix = "s-"
+client.apps = new Enmap("apps");
+const prefix = client.apps.ensure("prefix","s-")
+client.questions = new Enmap("questions")
+const defaultq = {
+    q1: "Please link us your plancke profile (https://plancke.io/hypixel/player/stats/yourignhere)",
+    q2: "Introduce yourself and your background on hypixel",
+    q3: "How did you first learn about our guild",
+    q4: "What are you applying for",
+    q5: "Have you been banned or muted on hypixel in the last 6 months, and if so why",
+    q6: "Do you think you can work well with others",
+    q7: "How long do you usually play per week",
+    q8: "What gamemode do you think you are the best at",
+    q9: "Do you have any stats you would like us to see",
+    q10: "Do you have anything else you want to say for your application"
+}
 Number.prototype.format = function(){
     return this.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
  };
@@ -28,7 +42,6 @@ function formatNumber(x) {
     return x.toLocaleString()
     //return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
-const emitter = new events.EventEmitter()
 client.on('ready', () => {
     console.log(`Ready! ${client.user.tag}`);
     client.user.setPresence({
@@ -41,7 +54,7 @@ client.on('ready', () => {
 });
 client.once('ready', ()=>{
     const obj = {event: "logged in", time: new Date(Date.now())}
-    fs.appendFile("./logs.txt", JSON.stringify(obj), ()=>{
+    fs.appendFile("./logs.txt", JSON.stringify(obj)+'\n', ()=>{
         return
     })
 })
@@ -50,18 +63,18 @@ try {
 
     if(message.author.bot==true) return
     if(message.content.startsWith(`${prefix}stats`)) {
-        if(message.channel.id!="713485578150084688") return message.author.send("Sorry but you cant use that command here.")
+        //if(message.channel.id!="713485578150084688") return message.author.send("Sorry but you cant use that command here.")
         const args = message.content.split(" ").slice(1)
         const username = args[0]
         let gamemode = args[1]
         const gamemodes = {
-        bw: "Bedwars",
-        sw: "Skywars",
-        sb: "Skyblock"
+        bw: "bedwars",
+        sw: "skywars",
+        sb: "skyblock"
     }
-    const gamemodes2 = ["Bedwars", "Skywars", "Skyblock"]
+    const gamemodes2 = ["bedwars", "skywars", "skyblock", "duels"]
         if(!gamemode) return message.channel.send(`You need to specify a gamemode ${message.author}.`)
-        if(!gamemodes.hasOwnProperty(gamemode.toLowerCase())&&!gamemodes2.includes(capitalize(gamemode))) return message.channel.send(`Please choose a proper gamemode, ${message.author}.`)
+        if(!gamemodes.hasOwnProperty(gamemode.toLowerCase())&&!gamemodes2.includes(gamemode.toLowerCase())) return message.channel.send(`Please choose a proper gamemode, ${message.author}.`)
         if(gamemodes.hasOwnProperty(gamemode.toLowerCase())) {
         gamemode = gamemodes[gamemode.toLowerCase()]
         }
@@ -74,7 +87,7 @@ try {
             .setThumbnail("https://i.ibb.co/GMmBzLY/blue-and-purp.png")
             .setTitle(`Stats for ${username} in \`${gamemode}\``)
             .setTimestamp()
-            if(gamemode == "Bedwars") {
+            if(gamemode == "bedwars") {
                 base = player.player.stats["Bedwars"]
                 embed
                 .addField("Level/Stars:", player.player.achievements.bedwars_level)
@@ -87,7 +100,7 @@ try {
                 .addFields({name: "WLR", value: Math.round(1000*(base.wins_bedwars/base.losses_bedwars))/1000, inline: true})
                 .setAuthor(message.guild.me.displayName, message.guild.me.user.avatarURL(), null)
                 return embed
-        } else if(gamemode == "Skywars") {
+        } else if(gamemode == "skywars") {
                 function sw_xp_to_lvl(xp) {
                 let xps = [0, 20, 70, 150, 250, 500, 1000, 2000, 3500, 6000, 10000, 15000];
                 if(xp >= 15000) {
@@ -156,7 +169,7 @@ try {
             return embed
         }
 
-        if(gamemode=="Skyblock") {
+        if(gamemode=="skyblock") {
                 let profs = []
                 const name_to_emoji = {
                     apple: ":apple: ",
@@ -326,9 +339,9 @@ try {
                             {name: "Runecrafting :sparkler:", value: `Level: ${runecrafting.level}`, inline: true},
                             {name: "Average Skill Level :tools:", value: asl},
                             {name: "Slayers :bow_and_arrow:", value: "\u200b"},
-                            {name: "Zombie :zombie:", value: `Level: ${zombie.level}, \n Next level in ${zombie.next} xp.(${data.slayer_bosses.zombie.xp})`, inline: true},
-                            {name: "Spider :spider:", value: `Level: ${spider.level}, \n Next level in ${spider.next} xp.(${data.slayer_bosses.spider.xp})`, inline: true},
-                            {name: "Wolf :wolf:", value: `Level ${wolf.level}, Next \n level in ${wolf.next} xp.(${data.slayer_bosses.wolf.xp})`, inline: true},
+                            {name: "Zombie :zombie:", value: `Level: ${zombie.level}, \n Next level in ${zombie.next} xp.(${data.slayer_bosses.zombie.xp} currently)`, inline: true},
+                            {name: "Spider :spider:", value: `Level: ${spider.level}, \n Next level in ${spider.next} xp.(${data.slayer_bosses.spider.xp} currently)`, inline: true},
+                            {name: "Wolf :wolf:", value: `Level ${wolf.level}, Next \n level in ${wolf.next} xp.(${data.slayer_bosses.wolf.xp} currently)`, inline: true},
                             {name: ":heartpulse: Fairy Souls: ", value: `${data.fairy_souls_collected}/206`}
                             )
                             
@@ -345,12 +358,30 @@ try {
             )
         })
         }
+        else if (gamemode == "duels") {
+            base = player.player.stats.Duels
+            let solo = "bridge_duel_"
+            console.log(base)
+            let type = args[2].toLowerCase()
+            if(type&&type=="bridge") {
+                embed.setDescription("Stats for `The Bridge`.")
+                    embed.addFields({name: "Solo", value: "** **"},
+                    {name: "** **",value: "** **"},
+                    {name: "Wins", value: base[solo+"wins"], inline: true},
+                    {name: "Losses", value: base[solo+"losses"], inline: true},
+                    {name: "W/L Ratio", value: Math.round((base[solo+"wins"]/base[solo+"losses"])*100)/100, inline: true},
+                    {name: "Kills", value: base[solo+"bridge_kills"], inline: true},
+                    {name: "Deaths", value: base[solo+"bridge_deaths"], inline: true},
+                    {name: "K/D Ratio", value: Math.round((base[solo+"bridge_kills"]/base[solo+"bridge_deaths"])*100)/100 , inline: true}
+                    )
+                    return embed
+            }
+        }
         }).then(j=>{if(j)message.channel.send(j)}
         )
         .catch(
             error=>{
                 if(error) console.log(error)
-                console.log(error=="SyntaxError: Unexpected end of JSON inputs")
                 if(error=="SyntaxError: Unexpected token < in JSON at position 0"||error=="SyntaxError: Unexpected end of JSON input") {message.channel.send("Hypixel api might be down right now. Try again later."); return null} else
                     message.channel.send("An error occured, are you sure that player exists?")
             }
@@ -406,6 +437,7 @@ try {
             embed.addFields(
                 {name:"Profit", value: (totals.sell - 50000*count).format() + " coins"},
                 {name: "Cost", value: (50000*count).format()},
+                {name: "Sell", value: totals.sell},
                 {name: "Total rare drops obtained (1% chance or under):", value: totals.rares},
                 {name: "Revenant flesh", value: totals.flesh.format(), inline: true},
                 {name: "Foul flesh", value: totals.foul.format(), inline: true},
@@ -454,6 +486,7 @@ try {
             embed.addFields(
                 {name:"Profit", value: (totals.sell - 50000*count).format() + " coins"},
                 {name: "Cost", value: (50000*count).format()},
+                {name: "Sell", value: totals.sell},
                 {name: "Total rare drops obtained (1% chance or under):", value: totals.rares.format()},
                 {name: "Tarantula web", value: totals.web.format(), inline: true},
                 {name: "Toxic arrow poison", value: totals.toxic.format(), inline: true},
@@ -467,23 +500,104 @@ try {
             message.channel.send(embed)
         }
         if(slayer.toLowerCase()=="wolf" || slayer.toLowerCase().startsWith("sven")) {
-            for(var i = 0; i<count; i++) {
                 const totals = {
                     sell: 0,
                     teeth: 0,
                     wheel: 0,
-
+                    spirit: 0,
+                    crit: 0,
+                    claw: 0,
+                    corture: 0,
+                    bait: 0,
+                    overflux: 0,
+                    sell: 0,
+                    rares: 0,
+                    droppedWheel: 0
                 }
+            for(var i = 0; i<count; i++) {
+
                 let newSven = new Wolf(magic)
                 newSven.getDrops()
-                
+                for(var j in newSven.drops) {
+                    totals[j]+=newSven.drops[j]
+                    totals.sell += newSven.sell
+                    if(newSven.rare) totals.rares += 1
+                    if(newSven.wheel) totals.droppedWheel += 1
+                }
             }
+            embed.addFields(
+                {name: "profit", value: totals.sell-50000*count},
+                {name: "Cost", value: 50000*count},
+                {name: "Sell", value: totals.sell},
+                {name: "Total rare drops obtained (1% chance or under):", value: totals.rares.format()},
+                {name: "Wolf teeth: ", value: totals.teeth.format(), inline: true},
+                {name: "Hamster wheels", value: totals.wheel.format(), inline: true},
+                {name: "Spirit runes", value: totals.spirit.format(), inline: true},
+                {name: "Critical VI", value: totals.crit.format(), inline: true},
+                {name: "Red claw eggs", value: totals.claw.format(), inline: true},
+                {name: "Corture runes", value: totals.corture.format(), inline: true},
+                {name: "Grizzly bait", value: totals.bait.format(), inline: true},
+                {name: "Overflux Capacitors", value: totals.overflux.format(), inline: true}
+            )
+            message.channel.send(embed)
         }
     }
     //`https://api.hypixel.net/skyblock/profile?key=${process.env.key}&profile=${id}`
     
     if(message.author.id=="402639792552017920"&&message.content=="s-test") {
         message.reply("test");
+    }
+    if(message.author.id=="402639792552017920"&&message.content==`${prefix}apply`) {   
+        (async()=>{
+        var current = client.apps.get(message.author.id);
+        if(current&&message.author.id!="402639792552017920") {
+            return message.channel.send("You have already applied. Please wait for your application to be processed before submitting another one.")
+        }
+        console.log(current);
+        const questions = client.questions.ensure("questions", defaultq);
+        const msg = await message.author.send("Application started.")
+        const collector = msg.channel.createMessageCollector(m => m.content!="** **"&&m.author!=client.user, {max: 10, time: 60000})
+        collector.on("end", async (collected, err) => {
+            if(collected.size<1) return msg.channel.send("No response. Stopping application...")
+            const confirm = await msg.channel.send("Do you want to submit?")
+            const agree = await confirm.react('✅')
+            const deny = await confirm.react('❌')
+            const filter = (reaction)=>{return (reaction==agree||reaction==deny && reaction.me == false)}
+            const answers = await confirm.awaitReactions(filter, {time: 30000, max: 1})
+            if(answers.first) {
+                if(answers.first==agree) {
+                    //client.apps.set(message.author.id, {questions: questions, answers: answers})
+
+                } 
+            }
+        })
+        const responses = {}
+        for(j in questions) {
+            msg.channel.send(questions[j])
+            responses[j] = (await collector.next).content
+        }
+        console.log(responses)
+        })();
+
+        
+    }
+    if(message.author.id=="402639792552017920"&&message.content.startsWith(`${prefix}help`)) {
+        const args = message.content.trim().split(' ').slice(1).join(" ")
+        const embed = new Discord.MessageEmbed();
+        embed.setAuthor("Skillfully Bot", "https://i.ibb.co/GMmBzLY/blue-and-purp.png", null);
+        embed.setTitle("Skillfully Bot help");
+        embed.setDescription("Prefix: `s-`\n For questions or feedback, please contact a staff member. Source code is available in #announcements.")
+        embed.addFields({name: "Commands", value: "** **"}, {name: "apply", value:"Apply for the guild or a role in the discord."}, {name: "stats <ign> <game> [submode]", value:"Gets hypixel stats of a player in a certain mode. Use `"+prefix+"help stats` for a list of gamemodes."})
+        message.channel.send(embed)
+    }
+    if(message.member.hasPermission("MANAGE_GUILD")&&message.content.startsWith(`${prefix}settings`)) {
+        const args = message.content.split(" ").slice(1).join(" ")
+        if(args[0]=="prefix") {
+            client.apps.set("prefix", toString(args[1]))
+        }
+    }
+    if(message.content=="<@727555453134831616> prefix") {
+        message.reply(`the prefix in ${message.guild.name} is \`${prefix}\``)   
     }
 }catch (err){
     const date = new Date(Date.now())
@@ -498,5 +612,7 @@ try {
     fs.appendFile('./logs.txt', JSON.stringify(obj) + '\n', error=>{
         if(error) {console.log(error)}
     })
-}});
+}
+
+});
 client.login(token);

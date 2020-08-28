@@ -3,10 +3,11 @@ function getRandomIntInclusive(min, max) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive 
   }
-module.exports = class taran {
+module.exports = class Wolf {
     constructor(magic) {
         this.magic = parseInt(magic)
         this.rare = false
+        this.droppedWheel = false;
       this.drops = {
         teeth: 0,
         wheel: 0,
@@ -34,6 +35,7 @@ module.exports = class taran {
         if(dropFoul<=foulChance) {
         this.drops.wheel = getRandomIntInclusive(4, 5)
         this.sell += this.drops.wheel * 20000
+        this.droppedWheel = true;
     }
     //spirit rune
     let maxPest = 20
@@ -107,8 +109,8 @@ module.exports = class taran {
     }
     //overflex
     if(this.rare==false) {
-        let maxSnake = 13000
-        let snakeChance = 7 + 7*(this.magic*0.01)
+        let maxSnake = 1000000
+        let snakeChance = 385 + 385*(this.magic*0.01)
         while(snakeChance % 1 !=0){
             snakeChance *= 10
             maxSnake *= 10
@@ -120,5 +122,6 @@ module.exports = class taran {
             this.rare = true
         } 
     }
+    return this;
     }
 }
