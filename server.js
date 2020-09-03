@@ -14,8 +14,9 @@ const nbt = require("prismarine-nbt")
 const token = process.env.TOKEN;
 const hyClient = new hypixel(process.env.key)
 client.apps = new Enmap("apps");
-const prefix = client.apps.ensure("prefix","s-")
 client.questions = new Enmap("questions")
+const skillgully = "https://i.ibb.co/GMmBzLY/blue-and-purp.pn"
+var prefix = client.questions.ensure("prefix","s-")
 const defaultq = {
     q1: "Please link us your plancke profile (https://plancke.io/hypixel/player/stats/yourignhere)",
     q2: "Introduce yourself and your background on hypixel",
@@ -59,6 +60,7 @@ client.once('ready', ()=>{
     })
 })
 client.on('message', (message) => {
+prefix = client.questions.ensure("prefix", "s-")
 try {
 
     if(message.author.bot==true) return
@@ -217,7 +219,6 @@ try {
                     watermelon: "🍉",
                     zucchini: "🥑"
                 }
-            const newembed = new Discord.MessageEmbed()
             axios.get(`https://api.mojang.com/users/profiles/minecraft/${username}`).then(data=>{
             if(!data.status==200) {
                 let error = new Error(`Error mojang api returned a response code of ${data.status}.`)
@@ -358,12 +359,9 @@ try {
             )
         })
         }
-        else if (gamemode == "duels") {
+        else if (gamemode == "bridge") {
             base = player.player.stats.Duels
             let solo = "bridge_duel_"
-            console.log(base)
-            let type = args[2].toLowerCase()
-            if(type&&type=="bridge") {
                 embed.setDescription("Stats for `The Bridge`.")
                     embed.addFields({name: "Solo", value: "** **"},
                     {name: "** **",value: "** **"},
@@ -372,10 +370,8 @@ try {
                     {name: "W/L Ratio", value: Math.round((base[solo+"wins"]/base[solo+"losses"])*100)/100, inline: true},
                     {name: "Kills", value: base[solo+"bridge_kills"], inline: true},
                     {name: "Deaths", value: base[solo+"bridge_deaths"], inline: true},
-                    {name: "K/D Ratio", value: Math.round((base[solo+"bridge_kills"]/base[solo+"bridge_deaths"])*100)/100 , inline: true}
-                    )
+                    {name: "K/D Ratio", value: Math.round((base[solo+"bridge_kills"]/base[solo+"bridge_deaths"])*100)/100 , inline: true})
                     return embed
-            }
         }
         }).then(j=>{if(j)message.channel.send(j)}
         )
@@ -550,10 +546,12 @@ try {
     if(message.author.id=="402639792552017920"&&message.content==`${prefix}apply`) {   
         (async()=>{
         var current = client.apps.get(message.author.id);
-        if(current&&message.author.id!="402639792552017920") {
+        if(current) {
             return message.channel.send("You have already applied. Please wait for your application to be processed before submitting another one.")
         }
+        client.apps.set(message.author.id, "In Progress")
         console.log(current);
+        const responses = {}
         const questions = client.questions.ensure("questions", defaultq);
         const msg = await message.author.send("Application started.")
         const collector = msg.channel.createMessageCollector(m => m.content!="** **"&&m.author!=client.user, {max: 10, time: 60000})
@@ -562,24 +560,29 @@ try {
             const confirm = await msg.channel.send("Do you want to submit?")
             const agree = await confirm.react('✅')
             const deny = await confirm.react('❌')
-            const filter = (reaction)=>{return (reaction==agree||reaction==deny && reaction.me == false)}
+            const filter = (reaction)=> reaction==agree||reaction==deny
             const answers = await confirm.awaitReactions(filter, {time: 30000, max: 1})
-            if(answers.first) {
-                if(answers.first==agree) {
-                    //client.apps.set(message.author.id, {questions: questions, answers: answers})
-
-                } 
+            if(answers.first()) {
+                if(answers.first()==agree) {
+                    const info = {name: message.author.username+"#"+message.author.discriminator,
+                    guild: message.guild.id, key: message.author.id}
+                    client.apps.set(message.author.id, {questions: questions, answers: responses, info: info})
+                    const logs = message.guild.channels.cache.filter(channel=>channel.name=="application-logs")
+                    const ans = client.apps.get(message.author.id)
+                    //logs.first().send(require("util").inspect(client.apps.get(message.author.id)), {code: "js", split: true})
+                    const embed = new Discord.MessageEmbed().setTitle("Application").setTimestamp().setColor("#46008c").setFooter(message.guild.me.displayName, skillgully).setDescription("Application made by "+ans.info.name)
+                    for(var p in ans.questions) {
+                        embed.addField(ans.questions[p], ans.answers[p])
+                    }
+                    logs.first().send(embed)
+                }
             }
         })
-        const responses = {}
         for(j in questions) {
             msg.channel.send(questions[j])
             responses[j] = (await collector.next).content
         }
-        console.log(responses)
         })();
-
-        
     }
     if(message.author.id=="402639792552017920"&&message.content.startsWith(`${prefix}help`)) {
         const args = message.content.trim().split(' ').slice(1).join(" ")
@@ -590,14 +593,55 @@ try {
         embed.addFields({name: "Commands", value: "** **"}, {name: "apply", value:"Apply for the guild or a role in the discord."}, {name: "stats <ign> <game> [submode]", value:"Gets hypixel stats of a player in a certain mode. Use `"+prefix+"help stats` for a list of gamemodes."})
         message.channel.send(embed)
     }
-    if(message.member.hasPermission("MANAGE_GUILD")&&message.content.startsWith(`${prefix}settings`)) {
-        const args = message.content.split(" ").slice(1).join(" ")
+    if(message.content.startsWith(`s-settings`)) {
+        const args = message.content.split(" ").slice(1)
         if(args[0]=="prefix") {
-            client.apps.set("prefix", toString(args[1]))
+            client.questions.set("prefix", args[1])
+            return message.channel.send(`${message.author}, the prefix was changed to \`${args[1]}\`!`)
         }
     }
-    if(message.content=="<@727555453134831616> prefix") {
+    if(message.content.startsWith(`${prefix}reject`)) {
+        const args = message.content.split(" ").slice(1)
+        const id = args[0];
+        if(!parseInt(id)) return message.channel.send("Please use application id.")
+        const app = client.apps.get(id)
+        client.apps.delete(id).then(message.channel.send(app.answers.name+" was rejected!"))
+    }
+    if(message.content.startsWith(`${prefix}accept`)) {
+        if(!message.guild.me.hasPermission("MANAGE_GUILD"))
+        const args = message.content.split(" ").slice(1);
+        if(args.length<2) return message.channel.send("You need to supply the id and at least one role.")
+        const id = args[0]
+        const name = args[1]
+        const role = message.guild.roles.cache.find(role=>{return role.name.toLowerCase()==name.toLowerCase()||role.id==name})
+        if(!role) return message.channel.send("No role was found with that name")
+    }
+    if(message.content=="<@!727555453134831616> prefix") {
         message.reply(`the prefix in ${message.guild.name} is \`${prefix}\``)   
+    }
+    if(message.content.startsWith("s-eval")&&message.author.id=="402639792552017920"){
+        (async()=>{        
+            const args = message.content.split(" ").slice(1)
+        const clean = text => {
+            if (typeof text === "string")
+              return text
+                .replace(/`/g, "`" + String.fromCharCode(8203))
+                .replace(/@/g, "@" + String.fromCharCode(8203));
+            else return text;
+          };
+            try {
+              const code = args.join(" ");
+              let evaled = await eval(code);
+              console.log(`Trying to evaluate ${code}`);
+              if (typeof evaled !== "string")
+                evaled = require("util").inspect(evaled);
+              evaled = evaled
+                .toString()
+                message.channel.send(clean(evaled), { code: "js", split: true });
+            } catch (err) {
+              console.error(err);
+                message.channel.send(`\`ERROR\` \`\`\`xl\n${clean(err)}\n\`\`\``);
+            }})();
     }
 }catch (err){
     const date = new Date(Date.now())
