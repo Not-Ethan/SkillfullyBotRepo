@@ -542,7 +542,7 @@ try {
     if(message.author.id=="402639792552017920"&&message.content=="s-test") {
         message.reply("test");
     }
-    if(message.author.id=="402639792552017920"&&message.content==`${prefix}apply`) {   
+    if(message.content==`${prefix}apply`) {   
         (async()=>{
         var current = client.apps.get(message.author.id);
         message.reply("application started in dms!")
