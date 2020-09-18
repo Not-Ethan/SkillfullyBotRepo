@@ -26,7 +26,7 @@ const defaultq = {
     q7: "How long do you usually play per week?",
     q8: "What gamemode do you think you are the best at?",
     q9: "Do you have any stats you would like us to see?",
-    q10: "Do you have anything else you want to say for your application?"
+    q10: "Do you have anything else you want to say for your application? (Include revelant info like channel links, etc. Here if applicable.)"
 }
 Number.prototype.format = function(){
     return this.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
@@ -554,10 +554,14 @@ try {
         const questions = client.questions.ensure("questions", defaultq);
         const max = Object.keys(questions).length
         const msg = await message.author.send("Application started.");
-        const collector = msg.channel.createMessageCollector(m => m.content!="** **"&&m.author!=client.user, {max: max, time: 60000});
+        const collector = msg.channel.createMessageCollector(m => m.content!="** **"&&m.author!=client.user, {max: max, time: 300000});
         collector.on("end", async (collected, err) => {
-            if(collected.size<1) return msg.channel.send("No response. Stopping application...")
-            if(collected.size<10) return msg.channel.send("You need to respond to every question.")
+            if(collected.size<1) {
+                client.apps.delete(message.author.id);
+                return msg.channel.send("No response. Stopping application...")}
+            if(collected.size<10) {
+                client.apps.delete(message.author.id);
+                return msg.channel.send("You need to respond to every question. In the allocated time limit.")}
             const confirm = await msg.channel.send("Do you want to submit?")
             const agree = await confirm.react('✅')
             const deny = await confirm.react('❌')
