@@ -18,7 +18,7 @@ module.exports = class rev {
         horror: 0,
         scythe: 0
       }
-      this.sell = 0
+      this.sell = 0 
     }
     getDrops() {
       //rev flesh
@@ -117,7 +117,7 @@ module.exports = class rev {
         if(dropSnake<=snakeChance) {
             this.drops.snake = 1
             this.rare = true
-        } 
+        }
     }
     //scythe blade
     if(this.rare==false) {

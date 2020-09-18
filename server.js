@@ -15,19 +15,18 @@ const token = process.env.TOKEN;
 const hyClient = new hypixel(process.env.key)
 client.apps = new Enmap("apps");
 client.questions = new Enmap("questions")
-const skillgully = "https://i.ibb.co/GMmBzLY/blue-and-purp.pn"
 var prefix = client.questions.ensure("prefix","s-")
 const defaultq = {
-    q1: "Please link us your plancke profile (https://plancke.io/hypixel/player/stats/yourignhere)",
-    q2: "Introduce yourself and your background on hypixel",
-    q3: "How did you first learn about our guild",
-    q4: "What are you applying for",
-    q5: "Have you been banned or muted on hypixel in the last 6 months, and if so why",
-    q6: "Do you think you can work well with others",
-    q7: "How long do you usually play per week",
-    q8: "What gamemode do you think you are the best at",
-    q9: "Do you have any stats you would like us to see",
-    q10: "Do you have anything else you want to say for your application"
+    q1: "Please link us your plancke profile (https://plancke.io/hypixel/player/stats/yourignhere):",
+    q2: "Introduce yourself and your background on hypixel:",
+    q3: "How did you first learn about our guild?",
+    q4: "What are you applying for?",
+    q5: "Have you been banned or muted on hypixel in the last 6 months, and if so why?",
+    q6: "Do you think you can work well with others?",
+    q7: "How long do you usually play per week?",
+    q8: "What gamemode do you think you are the best at?",
+    q9: "Do you have any stats you would like us to see?",
+    q10: "Do you have anything else you want to say for your application?"
 }
 Number.prototype.format = function(){
     return this.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
@@ -237,7 +236,7 @@ try {
                     id: id,
                     player: uuid
                 })
-                embed.addField("** **",name_to_emoji[name.toLowerCase()]+name) 
+                embed.addField("** **",name_to_emoji[name.toLowerCase()]+name)
                 emojis.push(name)
             }
             message.channel.send(embed).then(
@@ -409,7 +408,7 @@ try {
                 flesh: 0, 
                 foul: 0, 
                 pest: 0,
-                undead: 0,
+                undead: 0, 
                 smite: 0,
                 droppedFoul: 0,
                 revCata: 0,
@@ -546,17 +545,19 @@ try {
     if(message.author.id=="402639792552017920"&&message.content==`${prefix}apply`) {   
         (async()=>{
         var current = client.apps.get(message.author.id);
+        message.reply("application started in dms!")
         if(current) {
             return message.channel.send("You have already applied. Please wait for your application to be processed before submitting another one.")
         }
         client.apps.set(message.author.id, "In Progress")
-        console.log(current);
         const responses = {}
         const questions = client.questions.ensure("questions", defaultq);
-        const msg = await message.author.send("Application started.")
-        const collector = msg.channel.createMessageCollector(m => m.content!="** **"&&m.author!=client.user, {max: 10, time: 60000})
+        const max = Object.keys(questions).length
+        const msg = await message.author.send("Application started.");
+        const collector = msg.channel.createMessageCollector(m => m.content!="** **"&&m.author!=client.user, {max: max, time: 60000});
         collector.on("end", async (collected, err) => {
             if(collected.size<1) return msg.channel.send("No response. Stopping application...")
+            if(collected.size<10) return msg.channel.send("You need to respond to every question.")
             const confirm = await msg.channel.send("Do you want to submit?")
             const agree = await confirm.react('✅')
             const deny = await confirm.react('❌')
@@ -567,16 +568,19 @@ try {
                     const info = {name: message.author.username+"#"+message.author.discriminator,
                     guild: message.guild.id, key: message.author.id}
                     client.apps.set(message.author.id, {questions: questions, answers: responses, info: info})
-                    const logs = message.guild.channels.cache.filter(channel=>channel.name=="application-logs")
+                    const logs = message.guild.channels.cache.find(channel=>channel.name=="application-logs")
                     const ans = client.apps.get(message.author.id)
                     //logs.first().send(require("util").inspect(client.apps.get(message.author.id)), {code: "js", split: true})
-                    const embed = new Discord.MessageEmbed().setTitle("Application").setTimestamp().setColor("#46008c").setFooter(message.guild.me.displayName, skillgully).setDescription("Application made by "+ans.info.name)
+                    const embed = new Discord.MessageEmbed().setTitle("Application").setTimestamp().setColor("#46008c").setFooter(message.guild.me.displayName, "https://i.ibb.co/GMmBzLY/blue-and-purp.png").setDescription("Application made by "+ans.info.name).setAuthor("Skillfully Bot", "https://i.ibb.co/GMmBzLY/blue-and-purp.png", null);
                     for(var p in ans.questions) {
                         embed.addField(ans.questions[p], ans.answers[p])
                     }
-                    logs.first().send(embed)
+                    embed.addField("Application ID",ans.info.key)
+                    logs.send(embed)
+                } else if(answers.first()==deny) {
+                    return msg.channel.send("Ok. Cancelling application.")
                 }
-            }
+            } 
         })
         for(j in questions) {
             msg.channel.send(questions[j])
@@ -594,27 +598,65 @@ try {
         message.channel.send(embed)
     }
     if(message.content.startsWith(`s-settings`)) {
+        if(!message.member.hasPermission("MANAGE_GUILD")) return message.channel.send("You do not have permission to do this!")
         const args = message.content.split(" ").slice(1)
         if(args[0]=="prefix") {
             client.questions.set("prefix", args[1])
             return message.channel.send(`${message.author}, the prefix was changed to \`${args[1]}\`!`)
         }
+        if(args[0]=="questions") {
+            const index = args[1]
+            const question = args.slice(2)
+            const join = "q"+index
+            client.questions.set("questions", question.join(" "), join)
+        }
     }
     if(message.content.startsWith(`${prefix}reject`)) {
+        if(!message.member.hasPermission("MANAGE_GUILD")) return message.channel.send("You do not have permission to do that!")
         const args = message.content.split(" ").slice(1)
         const id = args[0];
+        const msg = args.slice(1);
+        if(!msg) return message.channel.send("You need to add a rejection message.")
         if(!parseInt(id)) return message.channel.send("Please use application id.")
         const app = client.apps.get(id)
-        client.apps.delete(id).then(message.channel.send(app.answers.name+" was rejected!"))
+        if(client.apps.get(id)) {
+        client.apps.delete(id)
+        message.channel.send(apps.info.name+" was rejected!")
+        const embed = new Discord.MessageEmbed().setTitle("Application Rejected").addField("Message", msg.join(" "))
+        client.users.cache.get(id).send(embed)
+        }
     }
     if(message.content.startsWith(`${prefix}accept`)) {
-        if(!message.guild.me.hasPermission("MANAGE_GUILD"))
-        const args = message.content.split(" ").slice(1);
-        if(args.length<2) return message.channel.send("You need to supply the id and at least one role.")
-        const id = args[0]
-        const name = args[1]
-        const role = message.guild.roles.cache.find(role=>{return role.name.toLowerCase()==name.toLowerCase()||role.id==name})
-        if(!role) return message.channel.send("No role was found with that name")
+        if(!message.guild.me.hasPermission("MANAGE_GUILD")) return message.channel.send("You do not have permission.")
+        let args = message.content.split(" ").slice(1);
+        args = args.join(" ").split("-").slice(1);
+        let roles = args.filter(e=>e.startsWith("r"))
+        roles.forEach((v, i)=>roles[i]=message.guild.roles.cache.find(e=>e.name==v.split("").slice(1).join("").trim()))
+        let messages = args.filter(e=>e.startsWith("m"))
+        messages.forEach((v,i)=>message[i]=v.split("").slice(1).join("").trim());
+        messages = messages.join(" ")
+        let id = args.find(e=>e.startsWith("i")).split("").slice(1).join("").trim()
+        if(!id) return message.channel.send("You need to specify an id.")
+        if(!roles&&!message) return message.channel.send("You need to give at least a role or message.");
+        let app = client.apps.get(id);
+        if(!app) return message.channel.send("No application was found with that id.")
+        if(roles) {
+            for(i of roles) {
+                let member = message.guild.members.cache.get(id)
+                member.roles.add(i).catch(e=>{console.log(e); return message.channel.send("Sorry, an error occured. I might not have access to that role!")})
+            }
+        }
+        if(messages) {
+            if(client.users.cache.get(id)) {
+                const embed = new Discord.MessageEmbed().setTitle("Application Accepted!").addField("Message", messages)
+                client.users.cache.get(id).send(embed)
+            }
+        }
+        client.apps.delete(id)
+    }
+    if(message.content==`${prefix}rejectall`) {
+        if(!message.member.hasPermission("MANAGE_GUILD"))return message.channel.send("You do not have permission to run that command.")
+        client.apps.deleteAll();
     }
     if(message.content=="<@!727555453134831616> prefix") {
         message.reply(`the prefix in ${message.guild.name} is \`${prefix}\``)   
