@@ -544,10 +544,11 @@ try {
     if(message.content==`${prefix}apply`) {   
         (async()=>{
         var current = client.apps.get(message.author.id);
-        message.reply("application started in dms!")
         if(current) {
             return message.channel.send("You have already applied. Please wait for your application to be processed before submitting another one.")
         }
+        message.reply("application started in dms!")
+
         client.apps.set(message.author.id, "In Progress")
         const responses = {}
         const questions = client.questions.ensure("questions", defaultq);
@@ -567,6 +568,7 @@ try {
             const filter = (reaction)=> (reaction==agree||reaction==deny)&&reaction.me==false
             try {
             const answers = await confirm.awaitReactions(filter, {time: 30000, max: 1})
+            console.log(answers.first)
             if(answers.first()) {
                 if(answers.first()==agree) {
                     const info = {name: message.author.username+"#"+message.author.discriminator,
@@ -588,7 +590,7 @@ try {
             } 
             if(answers.size==0) {
                 msg.channel.send("No reply. Closing application.")
-                client.apps.delete(message.author.id)
+                return client.apps.delete(message.author.id)
             }
             }
             catch (e){
