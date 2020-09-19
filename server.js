@@ -1,21 +1,21 @@
 const Discord = require("discord.js");
 const Enmap = require("enmap");
-const events = require("events")
-const Rev = require("./rev.js")
-const Taran = require("./tara.js")
-const Wolf = require("./wolf.js")
-const levels = require("./skill_levels")
+const events = require("events");
+const Rev = require("./rev.js");
+const Taran = require("./tara.js");
+const Wolf = require("./wolf.js");
+const levels = require("./skill_levels");
 const fs = require("fs-extra");
 const client = new Discord.Client();
-const hypixel = require("hypixel-api")
-const parser = require("discord-command-parser")
-const axios = require("axios")
-const nbt = require("prismarine-nbt")
+const hypixel = require("hypixel-api");
+const parser = require("discord-command-parser");
+const axios = require("axios");
+const nbt = require("prismarine-nbt");
 const token = process.env.TOKEN;
 const hyClient = new hypixel(process.env.key)
 client.apps = new Enmap("apps");
-client.questions = new Enmap("questions")
-var prefix = client.questions.ensure("prefix","s-")
+client.questions = new Enmap("questions");
+var prefix = client.questions.ensure("prefix","s-");
 const defaultq = {
     q1: "Please link us your plancke profile (https://plancke.io/hypixel/player/stats/yourignhere):",
     q2: "Introduce yourself and your background on hypixel:",
@@ -223,7 +223,6 @@ try {
                 let error = new Error(`Error mojang api returned a response code of ${data.status}.`)
                 throw error
             }
-            
             let emojis = []
             let chars = []
             for(let i in player.player.stats.SkyBlock.profiles) {
@@ -566,6 +565,7 @@ try {
             const agree = await confirm.react('✅')
             const deny = await confirm.react('❌')
             const filter = (reaction)=> reaction==agree||reaction==deny
+            try {
             const answers = await confirm.awaitReactions(filter, {time: 30000, max: 1})
             if(answers.first()) {
                 if(answers.first()==agree) {
@@ -585,6 +585,11 @@ try {
                     return msg.channel.send("Ok. Cancelling application.")
                 }
             } 
+            }
+            catch (e){
+                console.log(e)
+            }
+
         })
         for(j in questions) {
             msg.channel.send(questions[j])
@@ -658,9 +663,10 @@ try {
         }
         client.apps.delete(id)
     }
-    if(message.content==`${prefix}rejectall`) {
+    if(message.content==`${prefix}clearapps`) {
         if(!message.member.hasPermission("MANAGE_GUILD"))return message.channel.send("You do not have permission to run that command.")
         client.apps.deleteAll();
+        message.channel.send("Applications cleared. :thumbsup:")
     }
     if(message.content=="<@!727555453134831616> prefix") {
         message.reply(`the prefix in ${message.guild.name} is \`${prefix}\``)   
