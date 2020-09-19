@@ -640,6 +640,7 @@ try {
         message.channel.send(apps.info.name+" was rejected!")
         const embed = new Discord.MessageEmbed().setTitle("Application Rejected").addField("Message", msg.join(" "))
         client.users.cache.get(id).send(embed)
+        message.reply("done!")
         }
     }
     if(message.content.startsWith(`${prefix}accept`)) {
@@ -669,6 +670,7 @@ try {
             }
         }
         client.apps.delete(id)
+        message.reply("done!")
     }
     if(message.content==`${prefix}clearapps`) {
         if(!message.member.hasPermission("MANAGE_GUILD"))return message.channel.send("You do not have permission to run that command.")
