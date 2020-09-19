@@ -568,7 +568,6 @@ try {
             const filter = (reaction)=> reaction==agree&&reaction.author!=client.user||reaction==deny&&reaction.author!=client.user
             try {
             const answers = await confirm.awaitReactions(filter, {time: 30000, max: 1})
-            console.log(answers.first)
             if(answers.first()) {
                 if(answers.first()==agree) {
                     const info = {name: message.author.username+"#"+message.author.discriminator,
