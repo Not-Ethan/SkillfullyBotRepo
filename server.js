@@ -582,12 +582,18 @@ try {
                     embed.addField("Application ID",ans.info.key)
                     logs.send(embed)
                 } else if(answers.first()==deny) {
+                    client.apps.delete(message.author.id)
                     return msg.channel.send("Ok. Cancelling application.")
                 }
             } 
+            if(answers.size==0) {
+                msg.channel.send("No reply. Closing application.")
+                client.apps.delete(message.author.id)
+            }
             }
             catch (e){
                 console.log(e)
+                client.apps.delete(message.author.id)
             }
 
         })
