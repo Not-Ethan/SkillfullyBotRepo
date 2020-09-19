@@ -564,7 +564,7 @@ try {
             const confirm = await msg.channel.send("Do you want to submit?")
             const agree = await confirm.react('✅')
             const deny = await confirm.react('❌')
-            const filter = (reaction)=> reaction==agree||reaction==deny
+            const filter = (reaction)=> (reaction==agree||reaction==deny)&&reaction.me==false
             try {
             const answers = await confirm.awaitReactions(filter, {time: 30000, max: 1})
             if(answers.first()) {
