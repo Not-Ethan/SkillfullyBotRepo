@@ -627,7 +627,7 @@ try {
             client.questions.set("questions", question.join(" "), join)
         }
     }
-    if(message.content.startsWith(`${prefix}reject`)) {
+    if(message.content.startsWith(`${prefix}reject`)||message.content.startsWith(`${prefix}deny`)) {
         if(!message.member.hasPermission("MANAGE_GUILD")) return message.channel.send("You do not have permission to do that!")
         const args = message.content.split(" ").slice(1)
         const id = args[0];
