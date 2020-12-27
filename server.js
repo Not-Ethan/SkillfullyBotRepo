@@ -84,7 +84,7 @@ try {
             let base;
             embed = new Discord.MessageEmbed()
             .setColor("#6119a8")
-            .setFooter("© 2020 Skillfully Guild", "https://i.ibb.co/GMmBzLY/blue-and-purp.png")
+            .setFooter("2020 Skillfully Guild", "https://i.ibb.co/GMmBzLY/blue-and-purp.png")
             .setThumbnail("https://i.ibb.co/GMmBzLY/blue-and-purp.png")
             .setTitle(`Stats for ${username} in \`${gamemode}\``)
             .setTimestamp()
@@ -322,7 +322,7 @@ try {
                             .setDescription("Stats might not be 100% accurate due to rounding. Partial progress is not taken into account when calculating average skill levels.")
                             .setThumbnail("https://i.ibb.co/GMmBzLY/blue-and-purp.png")
                             .setTimestamp()
-                            .setFooter("© 2020 Skillfully Guild", "https://i.ibb.co/GMmBzLY/blue-and-purp.png")
+                            .setFooter("2020 Skillfully Guild", "https://i.ibb.co/GMmBzLY/blue-and-purp.png")
                             .addFields(
                                 {name: "Bank Balance", value: Math.round(bal * 100)/100 + " coins"},
                             {
@@ -400,7 +400,7 @@ try {
         .setTitle(`Results of ${count} bosses using ${magic}% magic find.`)
         .setDescription("All rngesus drop chances are pure speculation and may not reflect actual chances in game. Maximum amount is 10000. Max magic find is 1000")
         .setTimestamp()
-        .setFooter("© 2020 Skillfully Guild", "https://i.ibb.co/GMmBzLY/blue-and-purp.png")
+        .setFooter("2020 Skillfully Guild", "https://i.ibb.co/GMmBzLY/blue-and-purp.png")
         .setThumbnail("https://i.ibb.co/GMmBzLY/blue-and-purp.png")
         if(slayer.toLowerCase().startsWith("rev") || slayer.toLowerCase()=="zombie") {
             let totals = {
@@ -563,9 +563,9 @@ try {
                 client.apps.delete(message.author.id);
                 return msg.channel.send("You need to respond to every question. In the allocated time limit.")}
             const confirm = await msg.channel.send("Do you want to submit?")
-            const agree = await confirm.react('✅')
-            const deny = await confirm.react('❌')
-            const filter = (reaction)=> reaction==agree&&reaction.author!=client.user||reaction==deny&&reaction.author!=client.user
+            const agree = await confirm.react('✅');
+            const deny = await confirm.react('❌');
+            const filter = (reaction)=> (reaction==agree&&reaction.author!=client.user)||(reaction==deny&&reaction.author!=client.user)
             try {
             const answers = await confirm.awaitReactions(filter, {time: 30000, max: 1})
             if(answers.first()) {
@@ -586,7 +586,7 @@ try {
                     client.apps.delete(message.author.id)
                     return msg.channel.send("Ok. Cancelling application.")
                 }
-            } 
+            }
             if(answers.size==0) {
                 msg.channel.send("No reply. Closing application.")
                 return client.apps.delete(message.author.id)
@@ -651,7 +651,7 @@ try {
         roles.forEach((v, i)=>roles[i]=message.guild.roles.cache.find(e=>e.name==v.split("").slice(1).join("").trim()))
         let messages = args.filter(e=>e.startsWith("m"))
         messages.forEach((v,i)=>message[i]=v.split("").slice(1).join("").trim());
-        messages = messages.join(" ")
+        messages = messages.join(" ");
         let id = args.find(e=>e.startsWith("i")).split("").slice(1).join("").trim()
         if(!id) return message.channel.send("You need to specify an id.")
         if(!roles&&!message) return message.channel.send("You need to give at least a role or message.");
@@ -704,6 +704,7 @@ try {
                 message.channel.send(`\`ERROR\` \`\`\`xl\n${clean(err)}\n\`\`\``);
             }})();
     }
+    
 }catch (err){
     const date = new Date(Date.now())
     console.log(err)
@@ -715,7 +716,7 @@ try {
         error: err.toString() + '\n'
     }
     fs.appendFile('./logs.txt', JSON.stringify(obj) + '\n', error=>{
-        if(error) {console.log(error)}
+        if(error) {console.log(error);}
     })
 }
 
