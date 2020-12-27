@@ -634,7 +634,7 @@ try {
         const msg = args.slice(1);
         if(!msg) return message.channel.send("You need to add a rejection message.")
         if(!parseInt(id)) return message.channel.send("Please use application id.")
-        const app = client.apps.get(id)
+        const apps = client.apps.get(id)
         if(client.apps.get(id)) {
         client.apps.delete(id)
         message.channel.send(apps.info.name+" was rejected!")
