@@ -704,6 +704,8 @@ try {
                 message.channel.send(`\`ERROR\` \`\`\`xl\n${clean(err)}\n\`\`\``);
             }})();
     }
+    if(message.channel.id=="786379924067713024"&&message.content!="j"&&message.author.id!="402639792552017920") message.delete();
+    
     
 }catch (err){
     const date = new Date(Date.now())
@@ -711,7 +713,7 @@ try {
     let obj = {
         event: "error",
         time: date+"\n",
-        author: message.author.tag+"\n",
+        author: message.author.tag+"\n",    
         content: message.content+"\n",
         error: err.toString() + '\n'
     }
