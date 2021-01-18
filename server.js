@@ -564,8 +564,8 @@ try {
                 return msg.channel.send("You need to respond to every question. In the allocated time limit.")}
             const confirm = await msg.channel.send("Do you want to submit?")
             const agree = await confirm.react('✅');
-            const deny = await confirm.react('❌');
-            const filter = (reaction)=> (reaction==agree&&reaction.author!=client.user)||(reaction==deny&&reaction.author!=client.user)
+            //const deny = await confirm.react('❌');
+            const filter = (reaction)=> (reaction==agree&&reaction.author!=client.user)/*||(reaction==deny&&reaction.author!=client.user)*/
             try {
             const answers = await confirm.awaitReactions(filter, {time: 30000, max: 1})
             if(answers.first()) {
@@ -582,10 +582,12 @@ try {
                     }
                     embed.addField("Application ID",ans.info.key)
                     logs.send(embed)
-                } else if(answers.first()==deny) {
+                    
+                } /*else if(answers.first()==deny) {
                     client.apps.delete(message.author.id)
                     return msg.channel.send("Ok. Cancelling application.")
-                }
+                }*/
+                
             }
             if(answers.size==0) {
                 msg.channel.send("No reply. Closing application.")
