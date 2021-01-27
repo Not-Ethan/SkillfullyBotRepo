@@ -640,7 +640,7 @@ try {
         if(client.apps.get(id)) {
         client.apps.delete(id)
         message.channel.send(apps.info.name+" was rejected!")
-        const embed = new Discord.MessageEmbed().setTitle("Application Rejected").addField("Message", msg.join(" "))
+        const embed = new Discord.MessageEmbed().setTitle("Application Rejected").addField("Message", msg.join(" ")||"Your application was denied. Please contact a staff member if you have any questions.")
         client.users.cache.get(id).send(embed)
         message.reply("done!")
         }
